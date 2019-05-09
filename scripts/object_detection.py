@@ -15,6 +15,7 @@ from moveit_commander.conversions import pose_to_list
 import geometry_msgs.msg
 from geometry_msgs.msg import Twist
 
+# https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 def object_detection(data):
     pepper = moveit_commander.RobotCommander()
     # move head
