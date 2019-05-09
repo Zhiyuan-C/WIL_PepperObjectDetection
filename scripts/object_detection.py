@@ -21,17 +21,24 @@ class MotionPlan(object):
     def __init__(self):
         """Initialisation"""
         super(MotionPlan, self).__init__()
+        moveit_commander.roscpp_initialize(sys.argv)
+        
+        pepper = moveit_commander.RobotCommander()
+        self.pepper = pepper
+        self.sub = rospy.Subscriber("/objects", Float32MultiArray, self.object_recognition)
+    
+    def object_recognition(self, data):
+        # if no object detected
+        object_data_array = []
+        if data.data.count() == 0:
+            return object_data_array
+        elif data.data.count() > 0:
+            object_data_array = data.data
+            return object_data_array 
 
 
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
-def object_recognition(data):
-    # if no object detected
-    object_data_array = []
-    if data.data.count() == 0:
-        return object_data_array
-    elif data.data.count() > 0:
-        object_data_array = data.data
-        return object_data_array
+
 
 def motion_plan():
     pepper = moveit_commander.RobotCommander()
@@ -43,7 +50,7 @@ def motion_plan():
 def main():
     # initialise ros node
     rospy.init_node("object_detection", anonymous=True)
-    rospy.Subscriber("object", Float32MultiArray, object_detection, queue_size=1)
+    
 
 if __name__ == '__main__':
     main()
