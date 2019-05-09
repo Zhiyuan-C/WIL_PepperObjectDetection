@@ -18,10 +18,12 @@ from geometry_msgs.msg import Twist
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 def object_recognition(data):
     # if no object detected
+    object_data_array = []
     if data.data.count() == 0:
-        pass
+        return object_data_array
     elif data.data.count() > 0:
-        object_id = data.data[0]
+        object_data_array = data.data
+        return object_data_array
 
 def motion_plan():
     pepper = moveit_commander.RobotCommander()
