@@ -15,6 +15,14 @@ from moveit_commander.conversions import pose_to_list
 import geometry_msgs.msg
 from geometry_msgs.msg import Twist
 
+
+class MotionPlan(object):
+    """Motion plan basied on object detection"""
+    def __init__(self):
+        """Initialisation"""
+        super(MotionPlan, self).__init__()
+
+
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 def object_recognition(data):
     # if no object detected
