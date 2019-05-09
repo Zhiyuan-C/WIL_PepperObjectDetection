@@ -13,3 +13,9 @@ import moveit_commander
 from moveit_commander.conversions import pose_to_list
 import geometry_msgs.msg
 from geometry_msgs.msg import Twist
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
