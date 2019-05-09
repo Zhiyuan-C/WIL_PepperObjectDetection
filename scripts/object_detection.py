@@ -27,13 +27,13 @@ class MotionPlan(object):
         self.pepper = pepper
         self.sub = rospy.Subscriber("/objects", Float32MultiArray, self.object_recognition)
     
-    def object_recognition(self, data):
+    def object_recognition(self, objects):
         # if no object detected
         object_data_array = []
-        if data.data.count() == 0:
+        if objects.data.count() == 0:
             return object_data_array
-        elif data.data.count() > 0:
-            object_data_array = data.data
+        elif objects.data.count() > 0:
+            object_data_array = objects.data
             return object_data_array 
 
 
