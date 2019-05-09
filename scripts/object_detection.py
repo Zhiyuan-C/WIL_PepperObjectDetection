@@ -16,11 +16,17 @@ import geometry_msgs.msg
 from geometry_msgs.msg import Twist
 
 def object_detection(data):
-
     pepper = moveit_commander.RobotCommander()
     # move head
     move_group = moveit_commander.MoveGroupCommander("head")
     joint_goal = move_group.get_current_joint_values()
+
+    # if no object detected
+    if data.data.count() == 0:
+        pass
+    elif data.data.count() > 0:
+        object_id = data.data[0]
+        
     
 def main():
     # initialise ros node
