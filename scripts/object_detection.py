@@ -34,7 +34,22 @@ class MotionPlan(object):
             return object_data_array
         elif objects.data.count() > 0:
             object_data_array = objects.data
-            return object_data_array 
+            return object_data_array
+    
+    # detect objects
+    # if no object detected, move pepper print("no object detect, searching for object")
+    # move to left
+    # move to right
+    # move head in first position [0, -0.7], detect object, then move left and right, detect object
+    # move head in second position [0, 0], detect object, then move left and right, detect object
+    # move head in third posution [0, 0.6], detect object, then move left and right, detect object
+    # Addition, if time allow
+    # spin the base, if possible, test with spin code first
+    # make special large object to substute for table (find obj can not recognise object with less feature)
+    # search for the special large object, test with sensor code first to see if it can reach to the object
+    # with head positin [0,0], spin the base, if special large object detected, move close to the object
+    # then perform the above movement to detect object
+
 
 
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
