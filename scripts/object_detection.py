@@ -15,6 +15,12 @@ from moveit_commander.conversions import pose_to_list
 import geometry_msgs.msg
 from geometry_msgs.msg import Twist
 
+# Addition, if time allow
+    # spin the base, if possible, test with spin code first
+    # make special large object to substute for table (find obj can not recognise object with less feature)
+    # search for the special large object, test with sensor code first to see if it can reach to the object
+    # with head positin [0,0], spin the base, if special large object detected, spin, face to the object move close to the object
+    # then perform the above movement to detect object
 
 class MotionPlan(object):
     """Motion plan basied on object detection"""
@@ -63,16 +69,10 @@ class MotionPlan(object):
     def move_second_pos(self):
         # move head in second position [0, 0], detect object, then move left and right, detect object
         pass
-        
-    # move head in third posution [0, 0.6], detect object, then move left and right, detect object
-    # Addition, if time allow
-    # spin the base, if possible, test with spin code first
-    # make special large object to substute for table (find obj can not recognise object with less feature)
-    # search for the special large object, test with sensor code first to see if it can reach to the object
-    # with head positin [0,0], spin the base, if special large object detected, spin, face to the object move close to the object
-    # then perform the above movement to detect object
 
-
+    def move_third_pos(self):
+        pass    
+        # move head in third posution [0, 0.6], detect object, then move left and right, detect object
 
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 
