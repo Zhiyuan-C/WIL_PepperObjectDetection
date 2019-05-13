@@ -25,16 +25,21 @@ class MotionPlan(object):
         
         pepper = moveit_commander.RobotCommander()
         self.pepper = pepper
-        self.sub = rospy.Subscriber("/objects", Float32MultiArray, self.object_recognition)
+        rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, self.approach_table)
     
-    def object_recognition(self, objects):
-        # if no object detected
-        object_data_array = []
+    def detect_table(self, objects):
+        """Detection for table with special object, id = 1"""
         if objects.data.count() == 0:
-            return object_data_array
-        elif objects.data.count() > 0:
-            object_data_array = objects.data
-            return object_data_array
+            return False
+        elif objects.data[0] == 1:
+            return True
+        else:
+            return False
+    
+    def approach_table(self, laser_msg):
+        pass
+
     
     # detect objects
     # if no object detected, move pepper print("no object detect, searching for object")
@@ -47,7 +52,7 @@ class MotionPlan(object):
     # spin the base, if possible, test with spin code first
     # make special large object to substute for table (find obj can not recognise object with less feature)
     # search for the special large object, test with sensor code first to see if it can reach to the object
-    # with head positin [0,0], spin the base, if special large object detected, move close to the object
+    # with head positin [0,0], spin the base, if special large object detected, spin, face to the object move close to the object
     # then perform the above movement to detect object
 
 
