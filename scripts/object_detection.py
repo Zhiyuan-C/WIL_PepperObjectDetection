@@ -40,12 +40,20 @@ class MotionPlan(object):
     def detect_table(self, objects):
         """Detection for table with special object, id = 1"""
         if objects.data.count() == 0:
-            return False
+            self.detect_table = False
+            print("no table object detected, start searching")
+            return "no table object detected, start searching"
         elif objects.data[0] == 1:
-            return True
+            self.detect_table = True
+            print("Detected table object, stop spin")
+            return "Detected table object, stop spin"
         else:
-            return False
+            self.detect_table = True
+            print("Object detect, but not table, stop spin")
+            return "Object detect, but not table, stop spin"
     
+    def spin_pepper(self):
+
     def approach_table(self, laser_msg):
         pass
 
