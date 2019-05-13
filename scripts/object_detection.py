@@ -32,6 +32,7 @@ class MotionPlan(object):
         self.pepper = moveit_commander.RobotCommander()
         self.detecting_table = False
         self.approaching = False
+        self.detected_object = False
         self.spin = Twist()
         self.approach = Twist()
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
@@ -94,16 +95,13 @@ class MotionPlan(object):
                     print("")
                 elif objects.data[13] == 6:
                     print("")
+                self.detected_object = True
         elif objects.data.count() == 0 and not detecting_table:
             # if there is no object detected, and is not detecting for table object, then move the head to detect
-            searching = True
-            while searching:
-                self.move_first_pos()
-                if objects.data.count() > 0:
-                    searching = False
-                    # self.detect_object(objects)
-                    break
-            
+            print("no object detected, start searching")
+            self.detected_object = False
+            self.move_head()
+                    
     
     def move_hd_to_right(self):
         # move to right
@@ -124,6 +122,31 @@ class MotionPlan(object):
     def move_third_pos(self):
         pass    
         # move head in third posution [0, 0.6], detect object, then move left and right, detect object
+    
+    def move_head(self):
+        searching = True
+        self.move_first_pos()
+        first_position_done = True
+        second_position_done = False
+        third_position_done = False
+        while searching:
+            if self.detected_object:
+                searching = False
+                # self.detect_object(objects)
+                break
+            elif first_position_done:
+                self.move_second_pos()
+                second_position_done = True
+                continue
+            elif second_position_done:
+                self.move_third_pos()
+                third_position_done = True
+                continue
+            else:
+                searching = False
+                break
+
+
 
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 
