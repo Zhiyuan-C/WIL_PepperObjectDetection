@@ -30,7 +30,7 @@ class MotionPlan(object):
         moveit_commander.roscpp_initialize(sys.argv)
      
         self.pepper = moveit_commander.RobotCommander()
-        self.detecting_table = True
+        self.detecting_table = False
         self.approaching = False
         self.spin = Twist()
         self.approach = Twist()
@@ -38,17 +38,20 @@ class MotionPlan(object):
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_object)
         rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, self.approach_table)
         pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
+        rate = rospy.Rate(3)
         while not rospy.is_shutdown():
             if detecting_table:
                 pub.publish(self.spin)
             if approaching:
                 pub.publish(self.approach)
                 self.approaching = False
+            rate.sleep()
     
     def detect_table(self, objects):
         """Detection for table with special object, id = 1"""
         if objects.data.count() == 0:
             self.spin.angular.z = 0.1
+            self.detecting_table = True
             print("no table object detected, start searching")
             return "no table object detected, start searching"
         elif objects.data[0] == 1:
@@ -75,7 +78,32 @@ class MotionPlan(object):
     def detect_object(self, objects):
         # detect objects
         # if no object detected, move pepper print("no object detect, searching for object")
-        pass
+        # check again with pepper to see if the data published is in order
+        # the code here is assume is in order, if not in order then modify the code before testing
+        if objects.data.count() > 0:
+            if objects.data[0] == 1 and objects.data.count() > 12:
+                # if the table is detected, then the object data array should be greater than 12 so the second object is also detected
+                # check frame
+                if objects.data[13] == 2:
+                    print("English breakfast tea is detected")
+                elif objects.data[13] == 3:
+                    print("")
+                elif objects.data[13] == 4:
+                    print("")
+                elif objects.data[13] == 5:
+                    print("")
+                elif objects.data[13] == 6:
+                    print("")
+        elif objects.data.count() == 0 and not detecting_table:
+            # if there is no object detected, and is not detecting for table object, then move the head to detect
+            searching = True
+            while searching:
+                self.move_first_pos()
+                if objects.data.count() > 0:
+                    searching = False
+                    # self.detect_object(objects)
+                    break
+            
     
     def move_hd_to_right(self):
         # move to right
