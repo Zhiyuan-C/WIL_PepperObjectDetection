@@ -6,8 +6,8 @@
 # http://doc.aldebaran.com/2-0/family/juliette_technical/laser_juliette.html
 
 import rospy
-from sensor_msgs import LaserScan
-from geometry_msgs import Twist
+from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import Twist
 
 def call_back(msg):
     print(msg.ranges[31]) # ranges have 62 messages in total, middle one should be 31, recheck with the srd_front/scan
