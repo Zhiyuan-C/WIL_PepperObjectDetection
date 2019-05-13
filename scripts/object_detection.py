@@ -28,34 +28,49 @@ class MotionPlan(object):
         """Initialisation"""
         super(MotionPlan, self).__init__()
         moveit_commander.roscpp_initialize(sys.argv)
-        
-        pepper = moveit_commander.RobotCommander()
-        self.pepper = pepper
-        self.detected_table = False
-        self.twisting = Twist()
+     
+        self.pepper = moveit_commander.RobotCommander()
+        self.detecting_table = True
+        self.approaching = False
+        self.spin = Twist()
+        self.approach = Twist()
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_object)
         rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, self.approach_table)
+        pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
+        while not rospy.is_shutdown():
+            if detecting_table:
+                pub.publish(self.spin)
+            if approaching:
+                pub.publish(self.approach)
+                self.approaching = False
     
     def detect_table(self, objects):
         """Detection for table with special object, id = 1"""
         if objects.data.count() == 0:
-            self.detect_table = False
+            self.spin.angular.z = 0.1
             print("no table object detected, start searching")
             return "no table object detected, start searching"
         elif objects.data[0] == 1:
-            self.detect_table = True
-            print("Detected table object, stop spin")
+            self.spin.angular.z = 0.0
+            self.approaching = True
+            self.detecting_table = False
+            print("Detected table object, stop spin, prepare to approach")
             return "Detected table object, stop spin"
         else:
-            self.detect_table = True
-            print("Object detect, but not table, stop spin")
-            return "Object detect, but not table, stop spin"
-    
-    def spin_pepper(self):
+            self.spin.angular.z = 0.0
+            self.approaching = False
+            self.detecting_table = False
+            print("Object detect, but not table, stop spin, do not approach")
+            return "Object detect, but not table, stop spin"  
 
     def approach_table(self, laser_msg):
-        pass
+        approach.linear.x = 0.1
+        if laser_msg.ranges[31] < 4:
+            approach.linear.x = 0.0
+        
+        print("Table detected, start approaching to table")
+        return "Start approaching to table"
 
     def detect_object(self, objects):
         # detect objects
