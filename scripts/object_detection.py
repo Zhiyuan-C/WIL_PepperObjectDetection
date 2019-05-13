@@ -25,7 +25,10 @@ class MotionPlan(object):
         
         pepper = moveit_commander.RobotCommander()
         self.pepper = pepper
+        self.detected_table = False
+        self.twisting = Twist()
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        rospy.Subscriber("/objects", Float32MultiArray, self.detect_object)
         rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, self.approach_table)
     
     def detect_table(self, objects):
@@ -40,13 +43,27 @@ class MotionPlan(object):
     def approach_table(self, laser_msg):
         pass
 
+    def detect_object(self, objects):
+        # detect objects
+        # if no object detected, move pepper print("no object detect, searching for object")
+        pass
     
-    # detect objects
-    # if no object detected, move pepper print("no object detect, searching for object")
-    # move to left
-    # move to right
-    # move head in first position [0, -0.7], detect object, then move left and right, detect object
-    # move head in second position [0, 0], detect object, then move left and right, detect object
+    def move_hd_to_right(self):
+        # move to right
+        pass
+    
+    def move_hd_to_left(self):
+        # move to left
+        pass
+    
+    def move_first_pos(self):
+        # move head in first position [0, -0.7], detect object, then move left and right, detect object
+        pass
+    
+    def move_second_pos(self):
+        # move head in second position [0, 0], detect object, then move left and right, detect object
+        pass
+        
     # move head in third posution [0, 0.6], detect object, then move left and right, detect object
     # Addition, if time allow
     # spin the base, if possible, test with spin code first
