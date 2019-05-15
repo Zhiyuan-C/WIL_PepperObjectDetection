@@ -22,7 +22,7 @@ from geometry_msgs.msg import Twist
     # with head positin [0,0], spin the base, if special large object detected, spin, face to the object move close to the object
     # then perform the above movement to detect object
 
-class MotionPlan(object):
+class DetectObject(object):
     """Motion plan basied on object detection"""
     def __init__(self):
         """Initialisation"""
@@ -175,12 +175,6 @@ class MotionPlan(object):
 
 # https://github.com/ros/ros_comm/blob/ebd9e491e71947889eb81089306698775ab5d2a2/test/test_rospy/test/unit/test_rospy_topics.py
 
-
-def motion_plan():
-    pepper = moveit_commander.RobotCommander()
-    # move head
-    move_group = moveit_commander.MoveGroupCommander("head")
-    joint_goal = move_group.get_current_joint_values()
         
     
 def main():
