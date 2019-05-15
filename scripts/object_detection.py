@@ -81,22 +81,28 @@ class MotionPlan(object):
         # if no object detected, move pepper print("no object detect, searching for object")
         # check again with pepper to see if the data published is in order
         # the code here is assume is in order, if not in order then modify the code before testing
-        if objects.data.count() > 0:
-            if objects.data[0] == 1 and objects.data.count() > 12:
+        object_name = ""
+        if len(objects.data) > 0:
+            if objects.data[0] == 1.0 and len(objects.data) > 12:
                 # if the table is detected, then the object data array should be greater than 12 so the second object is also detected
                 # check frame
-                if objects.data[13] == 2:
-                    print("English breakfast tea is detected")
-                elif objects.data[13] == 3:
-                    print("")
-                elif objects.data[13] == 4:
-                    print("")
-                elif objects.data[13] == 5:
-                    print("")
-                elif objects.data[13] == 6:
-                    print("")
+                if objects.data[13] == 2.0:
+                    object_name = "tea1"
+                    print("detected {}".format(object_name))
+                elif objects.data[13] == 3.0:
+                    object_name = "tea2"
+                    print("detected {}".format(object_name))
+                elif objects.data[13] == 4.0:
+                    object_name = "tea3"
+                    print("detected {}".format(object_name))
+                elif objects.data[13] == 5.0:
+                    object_name = "tea4"
+                    print("detected {}".format(object_name))
+                elif objects.data[13] == 6.0:
+                    object_name = "tea5"
+                    print("detected {}".format(object_name))
                 self.detected_object = True
-        elif objects.data.count() == 0 and not detecting_table:
+        elif len(objects.data) == 0 and not detecting_table:
             # if there is no object detected, and is not detecting for table object, then move the head to detect
             print("no object detected, start searching")
             self.detected_object = False
