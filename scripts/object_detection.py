@@ -37,7 +37,7 @@ class MotionPlan(object):
         self.approach = Twist()
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_object)
-        rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, self.approach_table)
+        rospy.Subscriber('/laser/srd_front/scan', LaserScan, self.approach_table)
         pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
         rate = rospy.Rate(3)
         while not rospy.is_shutdown():
@@ -103,7 +103,10 @@ class MotionPlan(object):
             self.move_head()
                     
     
-    def move_hd_to_right(self):
+    def move_hd_to_right(self, joint_goal):
+        joint_goal[0] = 0.0
+        move_group.go(joint_goal, wait=True)
+        move_group.stop()
         # move to right
         pass
     
@@ -112,16 +115,32 @@ class MotionPlan(object):
         pass
     
     def move_first_pos(self):
-        # move head in first position [0, -0.7], detect object, then move left and right, detect object
-        pass
+        # move head in first position looking down, detect object, then move left and right, detect object
+        move_group = moveit_commander.MoveGroupCommander("head")
+        joint_goal = move_group.get_current_joint_values()
+        joint_goal[0] = 0.0
+        joint_goal[1] = 0.5 # move down
+        print(self.detected_object)
+        if self.detected_object:
+            return True
+        for i in range(2):
+            joint_goal[0] += 0.8
+            if self.detected_object:
+                break
+        if not self.detected_object:
+            joint_goal[0] = 0.0
+        for i in range(2):
+            joint_goal[0] -= 0.8
+            if self.detected_object:
+                break
     
     def move_second_pos(self):
-        # move head in second position [0, 0], detect object, then move left and right, detect object
+        # move head in second position looking normal, detect object, then move left and right, detect object
         pass
 
     def move_third_pos(self):
         pass    
-        # move head in third posution [0, 0.6], detect object, then move left and right, detect object
+        # move head in third posution looking up, detect object, then move left and right, detect object
     
     def move_head(self):
         searching = True
