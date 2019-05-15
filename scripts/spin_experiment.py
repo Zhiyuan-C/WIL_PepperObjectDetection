@@ -1,32 +1,49 @@
 #!/usr/bin/env python
 
 import rospy
+from std_msgs.msg import Float32MultiArray
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 
-spin = Twist()
-detected_obj = False
+
 
 def call_back(msg):
-    if msg.data.count() > 0:
-        return True
+    # print(len(msg.data))
+    if len(msg.data) > 0:
+        spin_pepper.angular.z = 0.0
+        # detected_obj = True
     else:
-        return False
+        spin_pepper.angular.z = 0.1
+        # detected_obj = False
+    pub.publish(spin_pepper)
 
-def main():
-    rospy.init_node("spin_pepper")
+rospy.init_node("spin_pepper")
     # sub = rospy.Subscriber("/pepper_robot/odom", Odometry, call_back) # check the type with pepper, rosmsg show Odometry
-    sub = rospy.Subscriber("/objects", Float32MultiArray, call_back)
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-    rate = rospy.Rate(3)
-    while not rospy.is_shutdown():
-        if detected_obj:
-            spin.angular.z = 0.1
-        else:
-            spin.angular.z = 0.0
-        pub.publish(spin)
-        rate.sleep()
+sub = rospy.Subscriber("/objects", Float32MultiArray, call_back)
+    # print(detected_obj)
+pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+spin_pepper = Twist()
+
+rospy.spin()
+
+# def main():
+#     rospy.init_node("spin_pepper")
+#     # sub = rospy.Subscriber("/pepper_robot/odom", Odometry, call_back) # check the type with pepper, rosmsg show Odometry
+#     sub = rospy.Subscriber("/objects", Float32MultiArray, call_back)
+#     # print(detected_obj)
+#     pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+#     spin_pepper = Twist()
+
+#     rospy.spin()
+#     # rate = rospy.Rate(3)
+#     # while not rospy.is_shutdown():
+#     #     if detected_obj:
+#     #         spin.angular.z = 0.1
+#     #     else:
+#     #         spin.angular.z = 0.0
+#     #     pub.publish(spin)
+#     #     rate.sleep()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
