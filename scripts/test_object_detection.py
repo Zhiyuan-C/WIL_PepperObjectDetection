@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+import sys
 import unittest
 import object_detection
-from object_detection import object_recognition
+from std_msgs.msg import String, Float32MultiArray
 
 class TestObjectDetection(unittest.TestCase):
-    def test_image_recognition(self):
-        # test if outputs data
-        data = {data:[]} # put the data in
-        object_recognition(data)
+    def test_detect_object(self):
+        source = object_detection.DetectObject()
+        
+
+        
