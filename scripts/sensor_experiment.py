@@ -10,19 +10,25 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 def call_back(msg):
-    print(msg.ranges[31]) # ranges have 62 messages in total, middle one should be 31, recheck with the srd_front/scan
+    print("middle: {} || sum: {} || avg: {}".format(msg.ranges[7], sum(msg.ranges), (sum(msg.ranges)/15))) # ranges have 15 messages in total, middle one should be 7, recheck with the srd_front/scan
     move.linear.x = 0.1
-    if msg.ranges[31] < 4: # should stop move forward if the middle value is less than 4, check first with actual no move
+    if msg.ranges[7] < 1: # should stop move forward if the middle value is less than 4, check first with actual no move
         move.linear.x = 0
     pub.publish(move)
 
-def main():
-    rospy.init_node("laser_scan")
-    sub = rospy.Subscriber('/pepper/laser/srd_front/scan', LaserScan, call_back)
-    pub = rospy.Publisher('cmd_vel', Twist)
-    move = Twist()
+rospy.init_node("laser_scan")
+sub = rospy.Subscriber('/laser/srd_front/scan', LaserScan, call_back)
+pub = rospy.Publisher('cmd_vel', Twist)
+move = Twist()
+rospy.spin()
+# def main():
+#     rospy.init_node("laser_scan")
+#     sub = rospy.Subscriber('/laser/srd_front/scan', LaserScan, call_back)
+#     pub = rospy.Publisher('cmd_vel', Twist)
+#     move = Twist()
 
-    rospy.spin()
+#     rospy.spin()
+    
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
