@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import String, Float32MultiArray
 from geometry_msgs.msg import Twist
 
 # spin pepper to detect table
@@ -16,18 +16,24 @@ class DetectTable(object):
         self.spin_pepper = Twist()
         self.pub_data = 'false'
         rospy.loginfo("Start detecting table")
+        stop_pub_vel = False
         # publish two nodes
-        while not self.table_detected and not rospy.is_shutdown():
-            pub_vel(self.spin_pepper)
+        # 1, velocity, when table data is not detect, publish to the velocity
+        while not stop_pub_vel and not rospy.is_shutdown():
+            pub_vel(self.spin_pepper) # check if last message published
+            if self.table_detected:
+                stop_pub_vel = True
             rate.sleep()
+        # 2, string, publish when table data detected
         while not rospy.is_shutdown():
             pub_msg(self.pub_data)
-
-
-            
-        # 1, velocity, when table data is not detect, publish to the velocity
-        # 2, string, publish when table data detected
-        
-
-# once table object find, stop spin, break loop
-# subscribe to 1 node
+            rate.sleep
+    
+    def detect_table(objects):
+        # no object detect
+        if len(objects.data) == 0:
+            self.spin_pepper.angular.z = 0.1
+        elif objects.data[0] == 1:
+            self.spin_pepper.angular.z = 0.0
+            self.table_detected = True
+            self.pub_data = 'true'
