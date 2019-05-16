@@ -37,3 +37,6 @@ class DetectTable(object):
             self.spin_pepper.angular.z = 0.0
             self.table_detected = True
             self.pub_data = 'true'
+
+if __name__ == '__main__':
+    detect = DetectTable()
