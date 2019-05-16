@@ -37,6 +37,11 @@ class DetectTable(object):
             self.spin_pepper.angular.z = 0.0
             self.table_detected = True
             self.pub_data = 'true'
+        
+        # more
+        # check if the object width and height is in relation to the real frame
+        # if is in relation to the real frame
+        # spin the pepper, until the object is in the ejge of the camera
 
 if __name__ == '__main__':
     detect = DetectTable()
