@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
 )
+find_package( OpenCV REQUIRED )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -121,6 +122,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -137,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/wil_pepper_object_detection_node.cpp)
-add_executable(detect_table_corner src/detect_table.cpp)
+# add_executable(detect_table_corner src/detect_table.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,9 +155,10 @@ add_executable(detect_table_corner src/detect_table.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(detect_table_corner
-   ${catkin_LIBRARIES}
-)
+# target_link_libraries(detect_table_corner
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_INCLUDE_DIRS}
+# )
 
 #############
 ## Install ##
