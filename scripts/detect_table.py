@@ -12,31 +12,40 @@ class DetectTable(object):
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
         rospy.Rate = (10)
-        self.table_detected = False
         self.spin_pepper = Twist()
-        self.pub_data = 'false'
         rospy.loginfo("Start detecting table")
         stop_pub_vel = False
         # publish two nodes
-        # 1, velocity, when table data is not detect, publish to the velocity
+        self.start_spin = False
+        self.already_spined = False
+        while not rospy.is_shutdown():
+            # 1, velocity, when table data is not detect, publish to the velocity
+            if not self.already_spined:
+                pub_vel(self.spin_pepper) # check if last message published
+            elif self.already_spined and 
+            
+
+            # 2, string, publish when table data detected
+            pub_msg(self.pub_data)
+
+            rate.sleep
+
         while not stop_pub_vel and not rospy.is_shutdown():
-            pub_vel(self.spin_pepper) # check if last message published
+            
             if self.table_detected:
                 stop_pub_vel = True
             rate.sleep()
-        # 2, string, publish when table data detected
-        while not rospy.is_shutdown():
-            pub_msg(self.pub_data)
-            rate.sleep
+        
     
     def detect_table(objects):
         # no object detect
         if len(objects.data) == 0:
             self.spin_pepper.angular.z = 0.1
+            self.start_spin = True
         elif objects.data[0] == 1:
             self.spin_pepper.angular.z = 0.0
-            self.table_detected = True
-            self.pub_data = 'true'
+            if self.start_spin:
+                self.already_spined = True
         
         # more
         # check if the object width and height is in relation to the real frame
