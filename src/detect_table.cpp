@@ -39,3 +39,11 @@ void objectCallback(const std_msgs::Float32MultiArrayPtr &object)
 
 }
 
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "detect_table_corner");
+  ros::NodeHandle n;
+  ros::Subscriber sub = n.subscribe("/objects", 1, objectCallback);
+  ros::spin()
+}
+
