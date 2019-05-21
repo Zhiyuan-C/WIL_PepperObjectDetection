@@ -40,7 +40,7 @@ class DetectTable(object):
         self.at_center = False
         self.detect_object = False
         self.checked = False
-        self.count = 0
+        self.one_side_check_count = 5
         rospy.spin() # testing purpose, delete this after
 
         
@@ -62,59 +62,102 @@ class DetectTable(object):
         #     rate.sleep()
         
     def move_head(self):
-        pitch_val = 0.5
-        if not self.detect_object and self.initial_pos:
-            rospy.loginfo(self.detect_object)
-            # set initial pose
-            rospy.loginfo("initialise first position")
-            self.move_center(pitch_val)
-            self.move_left = True
-            self.initial_pos = False
-            self.count += 1
-            rospy.loginfo("first if => %s" % self.count)
-        elif self.move_left and not self.detect_object:
-            if self.joint_goal[0] <= 1:
-                self.move_to_left()
-                self.count += 1
-                rospy.loginfo("second if => %s" % self.count)
-        elif self.move_right and not self.detect_object:
-            if -1 <= self.joint_goal[0]:
-                self.move_to_right()
-                self.count += 1
-                rospy.loginfo("third if => %s" % self.count)
-        elif 
+        self.joint_goal[0] = 0.5
+        rospy.loginfo(self.joint_goal)
+        
+        if self.one_side_check_count == 5 and not self.detect_object:
+            rospy.loginfo("====Start initial position checking====")
+            rospy.loginfo("Current => %s" % self.joint_goal)
+            self.joint_goal[0] = 0.0
+            self.joint_goal[1] = 0.5
+            # self.execute_joint_goal()
+            self.one_side_check_count -= 1
+            rospy.loginfo("Sleep for 3 sec")
+            time.sleep(3)
+        elif self.one_side_check_count == 4 and not self.detect_object:
+            rospy.loginfo("====Start left checking 1====")
+            self.move_to_left()
+            # self.execute_joint_goal()
+            self.one_side_check_count -= 1
+            rospy.loginfo("Sleep for 3 sec")
+        elif self.one_side_check_count == 3 and not self.detect_object:
+            rospy.loginfo("====Start left checking 2====")
+            self.move_to_left()
+            # self.execute_joint_goal()
+            self.one_side_check_count -= 1
+            rospy.loginfo("Sleep for 3 sec")
+        elif self.one_side_check_count == 2 and not self.detect_object:
+            rospy.loginfo("====Start right checking 1====")
+            self.joint_goal[0] = -0.5
+            self.joint_goal[1] = 0.5
+            # self.execute_joint_goal()
+            self.one_side_check_count -= 1
+        elif self.one_side_check_count == 1 and not self.detect_object:
+            rospy.loginfo("====Start right checking 2====")
+            self.move_to_right
+            # self.execute_joint_goal()
+            self.one_side_check_count -= 1
+        elif self.one_side_check_count == 0 and not self.detect_object:
+            rospy.loginfo("====No object detetect, one side check finish====")
+        
 
-        else:
-            rospy.loginfo(self.detect_object)
+            
+
+            
+        # pitch_val = 0.5
+        # if not self.detect_object and self.initial_pos:
+        #     rospy.loginfo(self.detect_object)
+        #     # set initial pose
+        #     rospy.loginfo("initialise first position")
+        #     self.move_center(pitch_val)
+        #     self.move_left = True
+        #     self.initial_pos = False
+        #     self.count += 1
+        #     rospy.loginfo("initial => %s" % self.count)
+        # elif self.move_left and not self.detect_object:
+        #     if self.joint_goal[0] <= 1:
+        #         self.move_to_left()
+        #         self.count += 1
+        #         rospy.loginfo("move left => %s" % self.count)
+        # elif self.move_right and not self.detect_object:
+        #     if -1 <= self.joint_goal[0]:
+        #         self.move_to_right()
+        #         self.count += 1
+        #         rospy.loginfo("move right => %s" % self.count) 
+        # else:
+        #     rospy.loginfo("finish move %s" % self.detect_object)
 
     def move_center(self, pitch_val):
         if -0.5 <= self.joint_goal[1] <= 0.5:
             self.joint_goal[0] = 0.0
-            self.joint_goal[1] = pitch_val # move down
+            self.joint_goal[1] -= 0.5 # move down
             # when at 0.5, the max left and right are 1 , -1
             # self.execute_joint_goal()
             # rospy.loginfo(move_group.get_current_state())
+
             time.sleep(3)
             rospy.loginfo("initial joint => %s" % self.joint_goal)
 
     def move_to_left(self):
         self.joint_goal[0] += 0.5
         # self.execute_joint_goal(joint_goal)
-        rospy.loginfo("current => %s" % self.joint_goal)
-        time.sleep(3)
+        rospy.loginfo("New => %s" % self.joint_goal)
         if self.joint_goal[0] > 1:
             self.move_left = False
             self.move_right = True
+        rospy.loginfo("Sleep for 3 sec")
+        time.sleep(3)
 
     
 
     def move_to_right(self):
         self.joint_goal[0] -= 0.5
         # self.execute_joint_goal(joint_goal)
-        rospy.loginfo("current => %s" % self.joint_goal)
-        time.sleep(3)
+        rospy.loginfo("New => %s" % self.joint_goal)
         if self.joint_goal[0] < -1:
             self.move_right = False
+        rospy.loginfo("Sleep for 3 sec")
+        time.sleep(3)
 
     def execute_joint_goal(self):
         self.move_group.go(self.joint_goal, wait=True)
