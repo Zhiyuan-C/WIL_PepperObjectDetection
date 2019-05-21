@@ -32,13 +32,15 @@ class DetectTable(object):
 
         # initialise for object recognition
         # self.finish_one_side = False
-        # self.initial_pos = True
-        # self.move_left = False
-        # self.move_right = False
-        # self.at_left = False
-        # self.at_right = False
-        # self.at_center = False
+        self.initial_pos = True
+        self.move_left = False
+        self.move_right = False
+        self.at_left = False
+        self.at_right = False
+        self.at_center = False
         self.detect_object = False
+        self.checked = False
+        self.count = 0
         rospy.spin() # testing purpose, delete this after
 
         
@@ -58,15 +60,50 @@ class DetectTable(object):
         #     pub_msg(self.pub_data)
 
         #     rate.sleep()
-    
+        
     def move_head(self):
-        rospy.loginfo(self.detect_object)
+        pitch_val = 0.5
+        if not self.detect_object and self.initial_pos:
+            rospy.loginfo(self.detect_object)
+            # set initial pose
+            rospy.loginfo("initialise first position")
+            self.move_center(pitch_val)
+            self.move_left = True
+            self.initial_pos = False
+            self.count += 1
+            rospy.loginfo("first if => %s" % self.count)
+        elif self.move_left and not self.detect_object:
+            if self.joint_goal[0] <= 1:
+                self.move_to_left()
+                self.count += 1
+                rospy.loginfo("second if => %s" % self.count)
+        elif self.move_right and not self.detect_object:
+            if -1 <= self.joint_goal[0]:
+                self.move_to_right()
+                self.count += 1
+                rospy.loginfo("third if => %s" % self.count)
+
+        else:
+            rospy.loginfo(self.detect_object)
+
+    def move_center(self, pitch_val):
+        if -0.5 <= self.joint_goal[1] <= 0.5:
+            self.joint_goal[0] = 0.0
+            self.joint_goal[1] = pitch_val # move down
+            # when at 0.5, the max left and right are 1 , -1
+            # self.execute_joint_goal()
+            # rospy.loginfo(move_group.get_current_state())
+            time.sleep(3)
+            rospy.loginfo("initial joint => %s" % self.joint_goal)
 
     def move_to_left(self):
         self.joint_goal[0] += 0.5
         # self.execute_joint_goal(joint_goal)
         rospy.loginfo("current => %s" % self.joint_goal)
         time.sleep(3)
+        if self.joint_goal[0] > 1:
+            self.move_left = False
+            self.move_right = True
 
     
 
@@ -75,6 +112,8 @@ class DetectTable(object):
         # self.execute_joint_goal(joint_goal)
         rospy.loginfo("current => %s" % self.joint_goal)
         time.sleep(3)
+        if self.joint_goal[0] < -1:
+            self.move_right = False
 
     def execute_joint_goal(self):
         self.move_group.go(self.joint_goal, wait=True)
