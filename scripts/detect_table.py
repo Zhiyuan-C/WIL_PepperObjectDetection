@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 
+import time
+
 import rospy
 from std_msgs.msg import String, Float32MultiArray
 from geometry_msgs.msg import Twist
 
+import moveit_commander
+import moveit_msgs.msg
+from moveit_commander.conversions import pose_to_list
 # spin pepper to detect table
 class DetectTable(object):
     def __init__(self):
         # initialise
-        rospy.init_node("detect/table", anonymous=True)
+        rospy.init_node("detect_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         # initialise publisher
         # pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
@@ -19,11 +24,12 @@ class DetectTable(object):
         rospy.loginfo("Start detecting table")
 
         # initialise moveit
-        super(MotionPlan, self).__init__()
-        moveit_commander.roscpp_initialize(sys.argv)
+        super(DetectTable, self).__init__()
+        # moveit_commander.roscpp_initialize(sys.argv)
         self.pepper = moveit_commander.RobotCommander()
 
         # initialise for object recognition
+        self.finish_one_side = False
         rospy.spin() # testing purpose, delete this after
 
         
@@ -59,7 +65,8 @@ class DetectTable(object):
             rospy.loginfo("initial joint => %s" % joint_goal)
             # self.execute_joint_goal(joint_goal)
             # rospy.loginfo(move_group.get_current_state())
-            self.move_left_right(detected_table)
+            time.sleep(3)
+            self.move_left_right(detected_table, joint_goal)
         for i in range(2):
             if detected_table:
                 break
@@ -68,12 +75,16 @@ class DetectTable(object):
                 joint_goal[0] = 0.0
                 rospy.loginfo("move up %s time => %s" % (i, joint_goal))
                 # self.execute_joint_goal(joint_goal)
-                self.move_left_right(detected_table)
+                time.sleep(3)
+                self.move_left_right(detected_table, joint_goal)
+        self.finish_one_side = True
+        rospy.loginfo("finish_one_side => %s" % self.finish_one_side)
         
-    def move_left_right(self, detected_table):
+    def move_left_right(self, detected_table, joint_goal):
+        rospy.loginfo("finish_one_side => %s" % self.finish_one_side)
         move_left = True
         count = 0
-        rospy.loginfo("detected_table in move_lr => %s" % detected_table)
+        rospy.loginfo("move_left_right => %s" % detected_table)
         while count < 4:
             if detected_table:
                 rospy.loginfo("table detected")
@@ -86,6 +97,7 @@ class DetectTable(object):
             if move_left:
                 joint_goal[0] += 0.8
                 rospy.loginfo("move to left => %s" % joint_goal[0])
+                time.sleep(3)
                 # self.execute_joint_goal(joint_goal)
                 if detected_table:
                     joint_goal[0] = 0.0
@@ -100,15 +112,16 @@ class DetectTable(object):
                     joint_goal[0] = -0.8
                     # self.execute_joint_goal(joint_goal)
                     rospy.loginfo("finish left site, start right side => %s" % joint_goal)
+                    time.sleep(3)
                     if detected_table:
-                    rospy.loginfo("finish left site, start right side => %s" % joint_goal)
-                        rospy.loginfo("finish left site, start left side, table detected!)
+                        rospy.loginfo("finish left site, start left side, table detected!")
                         break
             # move right
             else:
                 joint_goal[0] -= 0.8
                 rospy.loginfo("move to right => %s" % joint_goal[0])
                 # self.execute_joint_goal(joint_goal)
+                time.sleep(3)
 
                 if detected_table:
                     joint_goal[0] = 0.0
@@ -126,6 +139,7 @@ class DetectTable(object):
 
 
     def turning_pepper(self, val):
+        # after spin when one side no table object detect, change one side detect to false
         if detected_table:
             self.spin_pepper.angular.z = val
             self.start_spin = True
@@ -139,9 +153,11 @@ class DetectTable(object):
         detected_table = False
         if len(objects.data) > 0 and objects.data[0] == 1:
             detected_table = True
-        self.move_head_detect_tb(detected_table)
+        
+        if not self.finish_one_side:
+            self.move_head_detect_tb(detected_table)
         # self.turning_pepper(detected_table) 
-            
+        
         
         
         # more
