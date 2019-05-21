@@ -57,9 +57,7 @@ class DetectTable(object):
             if self.
         #move right
 
-
-    def detect_table(self, objects):
-        # no object detect
+    def turning_pepper(self):
         if len(objects.data) == 0:
             self.spin_pepper.angular.z = 0.1
             self.start_spin = True
@@ -67,6 +65,10 @@ class DetectTable(object):
             self.spin_pepper.angular.z = 0.0
             if self.start_spin:
                 self.already_spined = True
+
+    def detect_table(self, objects):
+        # no object detect
+        
         
         # more
         # check if the object width and height is in relation to the real frame
