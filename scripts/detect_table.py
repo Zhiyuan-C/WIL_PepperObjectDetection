@@ -10,6 +10,7 @@ class DetectTable(object):
         # initialise
         rospy.init_node("detect/table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        rospy.Subscriber("/objects", Float32MultiArray, self.move_head_detect_tb)
         # initialise publisher
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
@@ -40,11 +41,24 @@ class DetectTable(object):
 
             rate.sleep()
         
-    
-    def move_head_detect_tb(objects):
+
+    def move_head_detect_tb(self, objects):
+        move_group = moveit_commander.MoveGroupCommander("head")
+        joint_goal = move_group.get_current_joint_values()
+        #[0] to move left or right
+        #[1] to move up or down
+        #set initial joint
+        joint_goal[0] = 0.0
+        joint_goal[1] = 0.5 # move down
+        move_group.go(joint_goal, wait=True)
+        move_group.stop()
+        count = 0
+        while count < 5:
+            if self.
+        #move right
 
 
-    def detect_table(objects):
+    def detect_table(self, objects):
         # no object detect
         if len(objects.data) == 0:
             self.spin_pepper.angular.z = 0.1
