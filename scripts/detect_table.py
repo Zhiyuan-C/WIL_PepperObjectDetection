@@ -10,7 +10,6 @@ class DetectTable(object):
         # initialise
         rospy.init_node("detect/table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
-        rospy.Subscriber("/objects", Float32MultiArray, self.move_head_detect_tb)
         # initialise publisher
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
@@ -24,11 +23,14 @@ class DetectTable(object):
         moveit_commander.roscpp_initialize(sys.argv)
         self.pepper = moveit_commander.RobotCommander()
 
+        # initialise for object recognition
+
+        
+        # initialise for turning
         self.spin_pepper = Twist()
-        stop_pub_vel = False
-        # publish two nodes
         self.start_spin = False
         self.already_spined = False
+        stop_pub_vel = False
         while not rospy.is_shutdown():
             # 1, velocity, when table data is not detect, publish to the velocity
             if not self.already_spined:
@@ -42,7 +44,7 @@ class DetectTable(object):
             rate.sleep()
         
 
-    def move_head_detect_tb(self, objects):
+    def move_head_detect_tb(self, detected_table):
         move_group = moveit_commander.MoveGroupCommander("head")
         joint_goal = move_group.get_current_joint_values()
         #[0] to move left or right
@@ -50,16 +52,61 @@ class DetectTable(object):
         #set initial joint
         joint_goal[0] = 0.0
         joint_goal[1] = 0.5 # move down
+        self.execute_joint_goal(joint_goal)
+        self.move_left_right(detected_table)
+        for i in range(2):
+            if detected_table:
+                break
+            else:
+                joint_goal[1] -= 0.5
+                joint_goal[0] = 0.0
+                self.execute_joint_goal(joint_goal)
+                self.move_left_right(detected_table)
+        
+    def move_left_right(self, detected_table):
+        move_left = True
+        count = 0
+        while count < 4:
+            if detected_table:
+                break
+            # the joint value is outside the range
+            if 2 < joint_goal[0] < -2:
+                break
+            # move left
+            if move_left:
+                joint_goal[0] += 0.8
+                self.execute_joint_goal(joint_goal)
+                if detected_table:
+                    joint_goal[0] = 0.0
+                    joint_goal[1] = 0.0
+                    self.execute_joint_goal(joint_goal)
+                    #spin_right = True
+                # set initialise right position
+                if 1.5 <= joint_goal[0] <= 1.7:
+                    move_left = False
+                    joint_goal[0] = -0.8
+                    self.execute_joint_goal(joint_goal)
+                    
+            # move right
+            else:
+                joint_goal[0] -= 0.8
+                self.execute_joint_goal(joint_goal)
+                if detected_table:
+                    joint_goal[0] = 0.0
+                    joint_goal[1] = 0.0
+                    self.execute_joint_goal(joint_goal)
+                    self.turning_pepper(-0.1)
+                break
+            count += 1
+    
+    def execute_joint_goal(self, joint_goal):
         move_group.go(joint_goal, wait=True)
         move_group.stop()
-        count = 0
-        while count < 5:
-            if self.
-        #move right
 
-    def turning_pepper(self):
-        if len(objects.data) == 0:
-            self.spin_pepper.angular.z = 0.1
+
+    def turning_pepper(self, val):
+        if detected_table:
+            self.spin_pepper.angular.z = val
             self.start_spin = True
         elif objects.data[0] == 1:
             self.spin_pepper.angular.z = 0.0
@@ -68,6 +115,12 @@ class DetectTable(object):
 
     def detect_table(self, objects):
         # no object detect
+        detected_table = False
+        if len(objects.data) > 0 and objects.data[0] == 1:
+            detected_table = True
+        self.move_head_detect_tb(detected_table)
+        self.turning_pepper(detected_table)
+            
         
         
         # more
