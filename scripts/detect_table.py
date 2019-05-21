@@ -161,46 +161,54 @@ class DetectTable(object):
                 self.already_spined = True
 
     def detect_table(self, objects):
-        move_group = moveit_commander.MoveGroupCommander("head")
-        joint_goal = move_group.get_current_joint_values()
-        detected_table = False
+        # move_group = moveit_commander.MoveGroupCommander("head")
+        # joint_goal = move_group.get_current_joint_values()
+        # detected_table = False
 
-        if len(objects.data) > 0 and objects.data[0] == 1:
-            rospy.loginfo("detected table => true")
-            detected_table = True
-        # no object detect
-        else:
-            for i in range(3):
-                rospy.loginfo("i => %s" % i)
-                if i == 0:
-                    rospy.loginfo("initialise first position")
-                    joint_goal[0] = 0.0
-                    joint_goal[1] = 0.5 # move down
-                    # when at 0.5, the max left and right are 1 , -1
-                    # self.execute_joint_goal(joint_goal)
-                    # rospy.loginfo(move_group.get_current_state())
-                    time.sleep(3)
-                    rospy.loginfo("initial joint => %s" % joint_goal)
-                    if len(objects.data) > 0 and objects.data[0] == 1:
-                        rospy.loginfo("===== Table object detected =====")
-                        break
-                    else:
-                        rospy.loginfo("start moving head left and right")
-
-
-                        self.move_left_right(joint_goal)
+        # if len(objects.data) > 0 and objects.data[0] == 1:
+        #     rospy.loginfo("detected table => true")
+        #     detected_table = True
+        # # no object detect
+        # else:
+        #     for i in range(3):
+        #         rospy.loginfo("i => %s" % i)
+        #         if i == 0:
+        #             rospy.loginfo("initialise first position")
+        #             joint_goal[0] = 0.0
+        #             joint_goal[1] = 0.5 # move down
+        #             # when at 0.5, the max left and right are 1 , -1
+        #             # self.execute_joint_goal(joint_goal)
+        #             # rospy.loginfo(move_group.get_current_state())
+        #             time.sleep(3)
+        #             rospy.loginfo("initial joint => %s" % joint_goal)
+        #             if len(objects.data) > 0 and objects.data[0] == 1:
+        #                 rospy.loginfo("===== Table object detected =====")
+        #                 break
+        #             else:
+        #                 rospy.loginfo("start moving head left and right")
+        #                 for to_left in range(2):
+        #                     self.move_to_left(joint_goal)
+        #                     if len(objects.data) > 0 and objects.data[0] == 1:
+        #                         rospy.loginfo("===== Table object detected at left =====")
+        #                         break
+        #                 for to_right in range(2):
+        #                     self.move_to_right(joint_goal)
+        #                     if len(objects.data) > 0 and objects.data[0] == 1:
+        #                         rospy.loginfo("===== Table object detected at left =====")
+        #                         break
+                
                 
 
-        while not detected_table:
-            rospy.loginfo("start moving head")
-            joint_goal[0] = 0.0
-            joint_goal[1] = 0.5 # move down
-            # when at 0.5, the max left and right are 1 , -1
-            rospy.loginfo("initial joint => %s" % joint_goal)
-            # self.execute_joint_goal(joint_goal)
-            # rospy.loginfo(move_group.get_current_state())
-            time.sleep(3)
-            self.move_left_right(joint_goal)
+        # while not detected_table:
+        #     rospy.loginfo("start moving head")
+        #     joint_goal[0] = 0.0
+        #     joint_goal[1] = 0.5 # move down
+        #     # when at 0.5, the max left and right are 1 , -1
+        #     rospy.loginfo("initial joint => %s" % joint_goal)
+        #     # self.execute_joint_goal(joint_goal)
+        #     # rospy.loginfo(move_group.get_current_state())
+        #     time.sleep(3)
+        #     self.move_left_right(joint_goal)
 
 
 
