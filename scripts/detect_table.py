@@ -7,13 +7,23 @@ from geometry_msgs.msg import Twist
 # spin pepper to detect table
 class DetectTable(object):
     def __init__(self):
+        # initialise
         rospy.init_node("detect/table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        # initialise publisher
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
+
         rospy.Rate = (10)
-        self.spin_pepper = Twist()
+        
         rospy.loginfo("Start detecting table")
+
+        # initialise moveit
+        super(MotionPlan, self).__init__()
+        moveit_commander.roscpp_initialize(sys.argv)
+        self.pepper = moveit_commander.RobotCommander()
+
+        self.spin_pepper = Twist()
         stop_pub_vel = False
         # publish two nodes
         self.start_spin = False
@@ -31,6 +41,9 @@ class DetectTable(object):
             rate.sleep()
         
     
+    def move_head_detect_tb(objects):
+
+
     def detect_table(objects):
         # no object detect
         if len(objects.data) == 0:
