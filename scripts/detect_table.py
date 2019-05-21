@@ -82,6 +82,7 @@ class DetectTable(object):
                 self.move_to_right()
                 self.count += 1
                 rospy.loginfo("third if => %s" % self.count)
+        elif 
 
         else:
             rospy.loginfo(self.detect_object)
