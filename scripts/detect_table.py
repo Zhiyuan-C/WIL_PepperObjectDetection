@@ -30,7 +30,6 @@ class DetectTable(object):
 
         # initialise for object recognition
         self.finish_one_side = False
-        self.detected_table = False
         rospy.spin() # testing purpose, delete this after
 
         
@@ -88,6 +87,7 @@ class DetectTable(object):
         count = 0
         rospy.loginfo("move_left_right => %s" % self.detected_table)
         while count < 4:
+            rospy.loginfo(self.detected_table)
             if self.detected_table:
                 rospy.loginfo("table detected")
                 break
@@ -119,7 +119,7 @@ class DetectTable(object):
                     if self.detected_table:
                         rospy.loginfo("finish left site, start left side, table detected!")
                         break
-            # move right
+            # move right    
             else:
                 joint_goal[0] -= 0.5
                 rospy.loginfo("move to right => %s" % joint_goal[0])
@@ -136,6 +136,15 @@ class DetectTable(object):
                 break
             count += 1
     
+    def move_to_left(self, joint_goal):
+        joint_goal[0] += 0.5
+        self.execute_joint_goal(joint_goal)
+        time.sleep(3)
+    def move_to_right(self, joint_goal):
+        joint_goal[0] -= 0.5
+        self.execute_joint_goal(joint_goal)
+        time.sleep(3)
+
     def execute_joint_goal(self, joint_goal):
         move_group.go(joint_goal, wait=True)
         move_group.stop()
@@ -152,11 +161,51 @@ class DetectTable(object):
                 self.already_spined = True
 
     def detect_table(self, objects):
-        # no object detect
+        move_group = moveit_commander.MoveGroupCommander("head")
+        joint_goal = move_group.get_current_joint_values()
+        detected_table = False
+
         if len(objects.data) > 0 and objects.data[0] == 1:
-            self.detected_table = True
-        if not self.finish_one_side and not self.detected_table:
-            self.move_head_detect_tb()
+            rospy.loginfo("detected table => true")
+            detected_table = True
+        # no object detect
+        else:
+            for i in range(3):
+                rospy.loginfo("i => %s" % i)
+                if i == 0:
+                    rospy.loginfo("initialise first position")
+                    joint_goal[0] = 0.0
+                    joint_goal[1] = 0.5 # move down
+                    # when at 0.5, the max left and right are 1 , -1
+                    # self.execute_joint_goal(joint_goal)
+                    # rospy.loginfo(move_group.get_current_state())
+                    time.sleep(3)
+                    rospy.loginfo("initial joint => %s" % joint_goal)
+                    if len(objects.data) > 0 and objects.data[0] == 1:
+                        rospy.loginfo("===== Table object detected =====")
+                        break
+                    else:
+                        rospy.loginfo("start moving head left and right")
+
+
+                        self.move_left_right(joint_goal)
+                
+
+        while not detected_table:
+            rospy.loginfo("start moving head")
+            joint_goal[0] = 0.0
+            joint_goal[1] = 0.5 # move down
+            # when at 0.5, the max left and right are 1 , -1
+            rospy.loginfo("initial joint => %s" % joint_goal)
+            # self.execute_joint_goal(joint_goal)
+            # rospy.loginfo(move_group.get_current_state())
+            time.sleep(3)
+            self.move_left_right(joint_goal)
+
+
+
+        # if not self.finish_one_side:
+        #     self.move_head_detect_tb()
         # self.turning_pepper(detected_table) 
         
         
