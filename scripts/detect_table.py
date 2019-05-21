@@ -22,18 +22,12 @@ class DetectTable(object):
             # 1, velocity, when table data is not detect, publish to the velocity
             if not self.already_spined:
                 pub_vel(self.spin_pepper) # check if last message published
-            elif self.already_spined and 
-            
-
+            elif self.already_spined:
+                pub_vel(self.spin_pepper)
+                break
             # 2, string, publish when table data detected
             pub_msg(self.pub_data)
 
-            rate.sleep
-
-        while not stop_pub_vel and not rospy.is_shutdown():
-            
-            if self.table_detected:
-                stop_pub_vel = True
             rate.sleep()
         
     
