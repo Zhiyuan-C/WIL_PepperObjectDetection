@@ -62,6 +62,7 @@ class DetectTable(object):
         if not detected_table:
             joint_goal[0] = 0.0
             joint_goal[1] = 0.5 # move down
+            # when at 0.5, the max left and right are 1 , -1
             rospy.loginfo("initial joint => %s" % joint_goal)
             # self.execute_joint_goal(joint_goal)
             # rospy.loginfo(move_group.get_current_state())
@@ -95,7 +96,7 @@ class DetectTable(object):
                 break
             # move left
             if move_left:
-                joint_goal[0] += 0.8
+                joint_goal[0] += 0.5
                 rospy.loginfo("move to left => %s" % joint_goal[0])
                 time.sleep(3)
                 # self.execute_joint_goal(joint_goal)
@@ -103,13 +104,14 @@ class DetectTable(object):
                     joint_goal[0] = 0.0
                     joint_goal[1] = 0.0
                     rospy.loginfo("detected at left, initialise => %s" % joint_goal)
+                    time.sleep(5)
                     break
                     # self.execute_joint_goal(joint_goal)
                     #spin_right = True
                 # set initialise right position
-                if 1.5 <= joint_goal[0] <= 1.7:
+                if 0.9 <= joint_goal[0] <= 1.2:
                     move_left = False
-                    joint_goal[0] = -0.8
+                    joint_goal[0] = -0.5
                     # self.execute_joint_goal(joint_goal)
                     rospy.loginfo("finish left site, start right side => %s" % joint_goal)
                     time.sleep(3)
@@ -118,7 +120,7 @@ class DetectTable(object):
                         break
             # move right
             else:
-                joint_goal[0] -= 0.8
+                joint_goal[0] -= 0.5
                 rospy.loginfo("move to right => %s" % joint_goal[0])
                 # self.execute_joint_goal(joint_goal)
                 time.sleep(3)
@@ -129,6 +131,7 @@ class DetectTable(object):
                     # self.execute_joint_goal(joint_goal)
                     # self.turning_pepper(-0.1)
                     rospy.loginfo("detected at right, initialise => %s" % joint_goal)
+                    
                     break
                 break
             count += 1
