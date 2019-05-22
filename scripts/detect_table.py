@@ -31,7 +31,7 @@ class DetectTable(object):
         rospy.init_node("detect_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         # initialise publisher
-        # pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         # pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
 
         rate = rospy.Rate(10)
@@ -63,7 +63,14 @@ class DetectTable(object):
             if not self.finish_detect:
                 self.pitch_check()
             elif self.finish_detect:
-                rospy.loginfo("======Object detected, object center is======")
+                rospy.loginfo("======Object detected, joint is======")
+                if self.at_center:
+                    rospy.loginfo("The object is in front of pepper!")
+                elif self.at_left:
+                    rospy.loginfo("The object is at left side of pepper, turn left")
+                elif self.at_right:
+                    rospy.loginfo("The object is at right side of pepper, turn right")
+
                 # rospy.loginfo("======Object detected, object center is======")
                 # rospy.loginfo(self.table_center)
                 # rospy.loginfo(type(self.table_center))
@@ -106,10 +113,10 @@ class DetectTable(object):
             time.sleep(2)
             if self.detect_object:
                 rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
+                self.get_detected_dirction(self.joint_goal)
                 self.finish_detect = True
-
                 time.sleep(2)
-                self.move_head(0.0, 0.0)
+                self.move_head(0.0, pitch_val)
                 time.sleep(2)
                 break
             else:
@@ -131,8 +138,9 @@ class DetectTable(object):
                 break
             if self.detect_object:
                 rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
+                self.get_detected_dirction(self.joint_goal)
                 self.finish_detect = True
-                self.move_head(0.0, 0.0)
+                self.move_head(0.0, pitch_val)
                 time.sleep(2)
                 break
             else:
@@ -163,7 +171,13 @@ class DetectTable(object):
         else:
             raise Error("Joint value out of range")
 
-
+    def get_detected_dirction(self, joint_val):
+        if joint_val[0] > 0:
+            self.at_left = True
+        elif joint_val[0] < 0:
+            self.at_right = True
+        elif joint_val[0] == 0:
+            self.at_center = True
 
     def execute_joint_goal(self):
         """ Execute joint value to let Pepper move its head """
