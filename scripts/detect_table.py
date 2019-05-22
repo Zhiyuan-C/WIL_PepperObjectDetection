@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import time
+import numpy
+import cv2
 
 import rospy
 from std_msgs.msg import String, Float32MultiArray
@@ -14,6 +16,7 @@ from moveit_commander.conversions import pose_to_list
 # roslaunch naoqi_driver naoqi_driver.launch nao_ip:=192.168.0.139 network_interface:=enp2s0 roscore_ip:=kate-iMac.local
 # roslaunch wil_pepper_object_detection moveit_planner.launch
 # rosrun find_object_2d find_object_2d image:=/naoqi_driver/camera/front/image_raw
+# rosrun moveit_commander moveit_commander_cmdline.py
 
 class Error(Exception):
     def __init__(self, error_message):
@@ -54,10 +57,19 @@ class DetectTable(object):
         self.left_right_check_count = 4
         self.up_down_check_count = 3
         self.cb_count = 0
+        self.table_center = None
         
         while not rospy.is_shutdown():
             if not self.finish_detect:
                 self.pitch_check()
+            elif self.finish_detect:
+                rospy.loginfo("======Object detected, object center is======")
+                # rospy.loginfo("======Object detected, object center is======")
+                # rospy.loginfo(self.table_center)
+                # rospy.loginfo(type(self.table_center))
+
+
+
             rate.sleep()
         # initialise for turning
         # self.spin_pepper = Twist()
@@ -95,11 +107,15 @@ class DetectTable(object):
             if self.detect_object:
                 rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
                 self.finish_detect = True
+
+                time.sleep(2)
+                self.move_head(0.0, 0.0)
+                time.sleep(2)
                 break
             else:
                 self.yaw_check(pitch_val)
             
-        if not self.detect_object and not self.finish_one_side:
+        if not self.detect_object and not self.finish_one_side and not self.finish_detect:
             rospy.loginfo("====No object in this side, back to initial====")
             self.finish_one_side = True
             self.move_head(0.0, 0.0)
@@ -116,6 +132,8 @@ class DetectTable(object):
             if self.detect_object:
                 rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
                 self.finish_detect = True
+                self.move_head(0.0, 0.0)
+                time.sleep(2)
                 break
             else:
                 if right:
@@ -145,6 +163,8 @@ class DetectTable(object):
         else:
             raise Error("Joint value out of range")
 
+
+
     def execute_joint_goal(self):
         """ Execute joint value to let Pepper move its head """
         self.move_group.go(self.joint_goal, wait=True)
@@ -162,8 +182,33 @@ class DetectTable(object):
                 self.already_spined = True
 
     def detect_table(self, objects):
-        if len(objects.data) > 0 and objects.data[0] == 2:
+        if len(objects.data) > 0 and objects.data[0] == 1:
             self.detect_object = True
+            # get transformation matrix
+            matrix = numpy.zeros((3, 3), dtype='float32')
+            matrix[0, 0] = objects.data[3]
+            matrix[1, 0] = objects.data[4]
+            matrix[2, 0] = objects.data[5]
+            matrix[0, 1] = objects.data[6]
+            matrix[1, 1] = objects.data[7]
+            matrix[2, 1] = objects.data[8]
+            matrix[0, 2] = objects.data[9]
+            matrix[1, 2] = objects.data[10]
+            matrix[2, 2] = objects.data[11]
+            
+            # get array of 2d vectors to transform
+            width = objects.data[1]
+            height = objects.data[2]
+            inpt_array = numpy.float32([[0,0],[width-1,0],[0,height-1],[width-1,height-1]]).reshape(-1,1,2)
+            
+            # perfrom perspective transformation
+            outpt_array = cv2.perspectiveTransform(inpt_array, matrix)
+            
+            # get object center
+            self.table_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
+            
+            
+
         else:
             self.detect_object = False
         
