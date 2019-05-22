@@ -77,6 +77,7 @@ class DetectTable(object):
         #     rate.sleep()
 
     def pitch_check(self):
+        """Move the Pepper's head up and down to detect object"""
         pitch_val = 1.0
         count = 0
         rate = rospy.Rate(10)
@@ -105,6 +106,7 @@ class DetectTable(object):
             time.sleep(2)
 
     def yaw_check(self, pitch_val):
+        """Move Pepper's head left and right to detect object"""
         right = False
         val = 0.0
         change_yaw_val = 0.5
@@ -126,6 +128,11 @@ class DetectTable(object):
                     right = True
     
     def move_head(self, yaw_val, pitch_val):
+        """ Set joints value for move the head of Pepper
+        Argument:
+            yaw_val: float value for yaw joint (move left or right)
+            pitch_val: float value for pitch joint (move up or down)
+        """
         if (-0.6 <= pitch_val <= 0.6) and (-1.5 <= yaw_val <= 1.5):
             self.joint_goal[0] = yaw_val
             self.joint_goal[1] = pitch_val # move down
@@ -139,6 +146,7 @@ class DetectTable(object):
             raise Error("Joint value out of range")
 
     def execute_joint_goal(self):
+        """ Execute joint value to let Pepper move its head """
         self.move_group.go(self.joint_goal, wait=True)
         self.move_group.stop()
 
