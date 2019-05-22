@@ -1,0 +1,30 @@
+<launch>
+  <arg name="detect_data" default="false"/>
+  <arg name="path_name" default="data"/>
+
+  <!-- launch Pepper dcm bringup -->
+  <include file="$(find pepper_dcm_bringup)/launch/pepper_bringup.launch" >
+    <arg name="network_interface" default="enp2s0"/>
+    <arg name="roscore_ip" default="kate-iMac.local"/>
+  </include>
+
+  <!-- launch naoqi_driver -->
+  <include file="$(find naoqi_driver)/launch/naoqi_driver.launch" >
+    <arg name="network_interface" default="enp2s0"/>
+    <arg name="roscore_ip" default="kate-iMac.local"/>
+    <arg name="nao_ip" default="192.168.0.139"/>
+  </include>  
+
+  <!-- Start MoveIt -->
+  <include file="$(find wil_pepper_object_detection)/launch/moveit_planner.launch" ></include>
+
+  <!-- Start find_object_2d -->
+  <node name="find_object_2d" pkg="find_object_2d" type="find_object_2d">
+    <param name="gui" value="true"/>
+	<param if="$(arg detect_data)" name="objects_path" value="$(find wil_pepper_object_detection)/data/$(arg path_name)"/>
+  </node>
+
+  <!-- Start laser -->
+  <include file="$(find pepper_sensors_py)/launch/laser.launch" ></include>
+
+</launch>
