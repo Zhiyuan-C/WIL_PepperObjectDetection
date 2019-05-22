@@ -10,6 +10,11 @@ import moveit_commander
 import moveit_msgs.msg
 from moveit_commander.conversions import pose_to_list
 
+# roslaunch pepper_dcm_bringup pepper_bringup.launch network_interface:=enp2s0 roscore_ip:=kate-iMac.local
+# roslaunch naoqi_driver naoqi_driver.launch nao_ip:=192.168.0.139 network_interface:=enp2s0 roscore_ip:=kate-iMac.local
+# roslaunch wil_pepper_object_detection moveit_planner.launch
+# rosrun find_object_2d find_object_2d image:=/naoqi_driver/camera/front/image_raw
+
 class Error(Exception):
     def __init__(self, error_message):
         self.error_message = error_message
@@ -72,65 +77,60 @@ class DetectTable(object):
         #     rate.sleep()
 
     def one_side(self):
+        for i in range(3):
+            
         if self.up_down_check_count == 3 and not self.detect_object:
             rospy.loginfo("====Start initial position checking====")
             self.move_head(0.0, 0.5)
             self.up_down_check_count -= 1
             time.sleep(2)
             self.left_right_check_count = 4
-            for i in range(4):
-                self.left_right(0.5)
+            self.left_right(0.5)
+                
         elif self.up_down_check_count == 2 and not self.detect_object:
             rospy.loginfo("====Start second position checking====")
             self.move_head(0.0, 0.0)
             self.up_down_check_count -= 1
             time.sleep(2)
             self.left_right_check_count = 4
-            for i in range(4):
-                self.left_right(0.0)
+            self.left_right(0.0)
+                
         elif self.up_down_check_count == 1 and not self.detect_object:
             rospy.loginfo("====Start final position checking====")
             self.move_head(0.0, -0.5)
             self.up_down_check_count -= 1
             time.sleep(2)
             self.left_right_check_count = 4
-            for i in range(4):
-                self.left_right(-0.5)
+            self.left_right(-0.5)
+                
         elif self.up_down_check_count == 0 and not self.detect_object:
             rospy.loginfo("====No object in this side, back to initial====")
             self.move_head(0.0, 0.0)
             self.finish_one_side = True
             time.sleep(2)
+
         elif self.finish_one_side:
             pass
    
 
     def left_right(self, pitch_val):
-        rospy.loginfo("current object detect => %s " % self.detect_object)
-        self.cb_count += 1
-        rospy.loginfo("call back count => %s " % self.cb_count)
-        left_val = 0.0
-        right_val = 0.0
-        if not self.detect_object:
-            for i in range(2):
-                if self.detect_object:
-                    rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
-                    self.finish_detect = True
-                    break
-                else:
-                    rospy.loginfo("====Start left checking %s ====" % i + 1)
-                    left_val += 0.5
-                    self.move_head(left_val, pitch_val)
-            for i in range(2):
-                if self.detect_object:
-                    rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
-                    self.finish_detect = True
-                    break
-                else:
-                    rospy.loginfo("====Start right checking %s ====" % i + 1)
-                    right_val += -0.5
-                    self.move_head(right_val, pitch_val)
-
+        right = False
+        val = 0.0
+        change_yaw_val = 0.5
+        for i in range(4):
+            if self.detect_object:
+                rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
+                self.finish_detect = True
+                break
+            else:
+                if right:
+                    change_yaw_val = -0.5
+                cr = i + 1
+                rospy.loginfo("====Start side checking %s ====" % cr)
+                val += change_yaw_val
+                self.move_head(right_val, pitch_val)
+                if val == 1.0:
+                    right = True
                        
         # if self.left_right_check_count == 4 and not self.detect_object:
         #     rospy.loginfo("====Start left checking 1====")
