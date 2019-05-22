@@ -57,7 +57,7 @@ class DetectTable(object):
         
         while not rospy.is_shutdown():
             if not self.finish_detect:
-                self.one_side()
+                self.pitch_check()
             rate.sleep 
         # initialise for turning
         # self.spin_pepper = Twist()
@@ -77,40 +77,58 @@ class DetectTable(object):
         #     rate.sleep()
 
     def pitch_check(self):
+        pitch_val = 1.0
         for i in range(3):
-
-        if self.up_down_check_count == 3 and not self.detect_object:
-            rospy.loginfo("====Start initial position checking====")
-            self.move_head(0.0, 0.5)
-            self.up_down_check_count -= 1
+            count = i + 1
+            rospy.loginfo("====Start position checking %s ====" % count)
+            pitch_val -= 0.5
+            self.move_head(0.0, pitch_val)
             time.sleep(2)
-            self.left_right_check_count = 4
-            self.left_right(0.5)
-                
-        elif self.up_down_check_count == 2 and not self.detect_object:
-            rospy.loginfo("====Start second position checking====")
-            self.move_head(0.0, 0.0)
-            self.up_down_check_count -= 1
-            time.sleep(2)
-            self.left_right_check_count = 4
-            self.left_right(0.0)
-                
-        elif self.up_down_check_count == 1 and not self.detect_object:
-            rospy.loginfo("====Start final position checking====")
-            self.move_head(0.0, -0.5)
-            self.up_down_check_count -= 1
-            time.sleep(2)
-            self.left_right_check_count = 4
-            self.left_right(-0.5)
-                
-        elif self.up_down_check_count == 0 and not self.detect_object:
+            if self.detect_object:
+                rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
+                self.finish_detect = True
+                break
+            else:
+                self.yaw_check(pitch_val)
+        if not self.detect_object and not self.finish_one_side:
             rospy.loginfo("====No object in this side, back to initial====")
-            self.move_head(0.0, 0.0)
             self.finish_one_side = True
+            self.move_head(0.0, 0.0)
             time.sleep(2)
 
-        elif self.finish_one_side:
-            pass
+
+        # if self.up_down_check_count == 3 and not self.detect_object:
+        #     rospy.loginfo("====Start initial position checking====")
+        #     self.move_head(0.0, 0.5)
+        #     self.up_down_check_count -= 1
+        #     time.sleep(2)
+        #     self.left_right_check_count = 4
+        #     self.left_right(0.5)
+                
+        # elif self.up_down_check_count == 2 and not self.detect_object:
+        #     rospy.loginfo("====Start second position checking====")
+        #     self.move_head(0.0, 0.0)
+        #     self.up_down_check_count -= 1
+        #     time.sleep(2)
+        #     self.left_right_check_count = 4
+        #     self.left_right(0.0)
+                
+        # elif self.up_down_check_count == 1 and not self.detect_object:
+        #     rospy.loginfo("====Start final position checking====")
+        #     self.move_head(0.0, -0.5)
+        #     self.up_down_check_count -= 1
+        #     time.sleep(2)
+        #     self.left_right_check_count = 4
+        #     self.left_right(-0.5)
+                
+        # elif self.up_down_check_count == 0 and not self.detect_object:
+        #     rospy.loginfo("====No object in this side, back to initial====")
+        #     self.move_head(0.0, 0.0)
+        #     self.finish_one_side = True
+        #     time.sleep(2)
+
+        # elif self.finish_one_side:
+        #     pass
    
 
     def yaw_check(self, pitch_val):
