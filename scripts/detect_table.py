@@ -79,11 +79,9 @@ class DetectTable(object):
                             rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
                             pub_vel.publish(self.spin_pepper)    
                         else:
-                            rospy.loginfo("start time is => %s" % self.start_time)
                             end_time = self.start_time + 10
-                            rospy.loginfo("end time is => %s" % end_time)
                             current_time = rospy.get_time()
-                            rospy.loginfo("current time is => %s" % current_time)
+                            # publish only for 10s
                             if current_time < end_time:
                                 self.done_turning = True
                                 rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
@@ -220,10 +218,13 @@ class DetectTable(object):
     def turning_pepper(self, val):
         if self.finish_detect:
             if self.detect_object:
-                rospy.loginfo("start turning at %s " % val)
-                self.spin_pepper.angular.z = 0.0
-                self.finish_spin = True
-                self.start_time = rospy.get_time()
+                # camera center for x axis, is 160
+                # continue spin untill to the center
+                if 158 < self.table_center[0] < 162:
+                    rospy.loginfo("start turning at %s " % val)
+                    self.spin_pepper.angular.z = 0.0
+                    self.finish_spin = True
+                    self.start_time = rospy.get_time()
             else:
                 rospy.loginfo("start turning at %s " % val)
                 self.spin_pepper.angular.z = val
