@@ -33,11 +33,8 @@ class DetectTable(object):
         # initialise publisher
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         # pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
-
         rate = rospy.Rate(10)
         
-        
-
         # initialise moveit
         super(DetectTable, self).__init__()
         # moveit_commander.roscpp_initialize(sys.argv)
@@ -63,10 +60,8 @@ class DetectTable(object):
         self.spin_pepper = Twist()
         self.finish_spin = False
         self.done_turning = False
-        # self.start_spin = False
-        # self.already_spined = False
-        # stop_pub_vel = False
         self.start_time = rospy.get_time()
+
         rospy.loginfo("Start detecting table")
         while not rospy.is_shutdown(): 
             time.sleep(5)
@@ -115,27 +110,18 @@ class DetectTable(object):
                                 pub_vel.publish(self.spin_pepper)
                     else:
                         rospy.loginfo("Turned, object is infront")
-                    
+
+            elif self.finish_one_side:
+                rospy.loginfo("No object in this direction, turn around")        
 
                 # rospy.loginfo("======Object detected, object center is======")
                 # rospy.loginfo(self.table_center)
                 # rospy.loginfo(type(self.table_center))
-
-
+            # 2, string, publish when table data detected
+            #     pub_msg(self.pub_data)
 
             rate.sleep()
-        
-        # while not rospy.is_shutdown():
-        #     # 1, velocity, when table data is not detect, publish to the velocity
-        #     if not self.already_spined:
-        #         pub_vel(self.spin_pepper) # check if last message published
-        #     elif self.already_spined:
-        #         pub_vel(self.spin_pepper)
-        #         break
-        #     # 2, string, publish when table data detected
-        #     pub_msg(self.pub_data)
 
-        #     rate.sleep()
 
     def pitch_check(self):
         """Move the Pepper's head up and down to detect object"""
