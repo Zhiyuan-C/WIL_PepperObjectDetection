@@ -59,6 +59,14 @@ class DetectTable(object):
         self.cb_count = 0
         self.table_center = None
         
+        # initialise for turning
+        self.spin_pepper = Twist()
+        self.finish_spin = False
+        self.done_turning = False
+        # self.start_spin = False
+        # self.already_spined = False
+        # stop_pub_vel = False
+        self.start_time = rospy.get_time()
         while not rospy.is_shutdown():
             if not self.finish_detect:
                 self.pitch_check()
@@ -67,9 +75,45 @@ class DetectTable(object):
                 if self.at_center:
                     rospy.loginfo("The object is in front of pepper!")
                 elif self.at_left:
-                    rospy.loginfo("The object is at left side of pepper, turn left")
+                    if not self.done_turning:
+                        rospy.loginfo("The object is at left side of pepper, turn left")
+                        if not self.finish_spin:
+                            self.turning_pepper(0.1)
+                            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                            pub_vel.publish(self.spin_pepper)    
+                        else:
+                            rospy.loginfo("start time is => %s" % self.start_time)
+                            end_time = self.start_time + 10
+                            rospy.loginfo("end time is => %s" % end_time)
+                            current_time = rospy.get_time()
+                            rospy.loginfo("current time is => %s" % current_time)
+                            if current_time < end_time:
+                                self.done_turning = True
+                                rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                                pub_vel.publish(self.spin_pepper)
+                    else:
+                        rospy.loginfo("Turned, object is infront")
+
                 elif self.at_right:
-                    rospy.loginfo("The object is at right side of pepper, turn right")
+                    if not self.done_turning:
+                        rospy.loginfo("The object is at left side of pepper, turn left")
+                        if not self.finish_spin:
+                            self.turning_pepper(-0.1)
+                            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                            pub_vel.publish(self.spin_pepper)    
+                        else:
+                            rospy.loginfo("start time is => %s" % self.start_time)
+                            end_time = self.start_time + 10
+                            rospy.loginfo("end time is => %s" % end_time)
+                            current_time = rospy.get_time()
+                            rospy.loginfo("current time is => %s" % current_time)
+                            if current_time < end_time:
+                                self.done_turning = True
+                                rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                                pub_vel.publish(self.spin_pepper)
+                    else:
+                        rospy.loginfo("Turned, object is infront")
+                    
 
                 # rospy.loginfo("======Object detected, object center is======")
                 # rospy.loginfo(self.table_center)
@@ -78,11 +122,7 @@ class DetectTable(object):
 
 
             rate.sleep()
-        # initialise for turning
-        # self.spin_pepper = Twist()
-        # self.start_spin = False
-        # self.already_spined = False
-        # stop_pub_vel = False
+        
         # while not rospy.is_shutdown():
         #     # 1, velocity, when table data is not detect, publish to the velocity
         #     if not self.already_spined:
@@ -151,6 +191,7 @@ class DetectTable(object):
                 val += change_yaw_val
                 self.move_head(val, pitch_val)
                 if val == 1.0:
+                    val = 0.0
                     right = True
     
     def move_head(self, yaw_val, pitch_val):
@@ -183,17 +224,20 @@ class DetectTable(object):
         """ Execute joint value to let Pepper move its head """
         self.move_group.go(self.joint_goal, wait=True)
         self.move_group.stop()
-
-
+    
     def turning_pepper(self, val):
-        # after spin when one side no table object detect, change one side detect to false
-        if self.detected_table:
-            self.spin_pepper.angular.z = val
-            self.start_spin = True
-        elif objects.data[0] == 1:
-            self.spin_pepper.angular.z = 0.0
-            if self.start_spin:
-                self.already_spined = True
+        if self.finish_detect:
+            if self.detect_object:
+                rospy.loginfo("start turning at %s " % val)
+                self.spin_pepper.angular.z = 0.0
+                self.finish_spin = True
+                self.start_time = rospy.get_time()
+            else:
+                rospy.loginfo("start turning at %s " % val)
+                self.spin_pepper.angular.z = val
+        else:
+            # trun pepper at speed of 0.2
+            rospy.loginfo("no object detect, turning at 0.2 velocity")
 
     def detect_table(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
