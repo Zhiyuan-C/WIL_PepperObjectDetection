@@ -71,6 +71,7 @@ class DetectTable(object):
             elif self.finish_detect:
                 if self.at_front:
                     rospy.loginfo("The object is in front of pepper!")
+                    # move close to the table object
                 elif self.at_left:
                     if not self.done_turning:
                         rospy.loginfo("The object is at left side of pepper, turn left")
