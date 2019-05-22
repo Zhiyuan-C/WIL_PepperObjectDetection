@@ -76,9 +76,9 @@ class DetectTable(object):
 
         #     rate.sleep()
 
-    def one_side(self):
+    def pitch_check(self):
         for i in range(3):
-            
+
         if self.up_down_check_count == 3 and not self.detect_object:
             rospy.loginfo("====Start initial position checking====")
             self.move_head(0.0, 0.5)
@@ -113,7 +113,7 @@ class DetectTable(object):
             pass
    
 
-    def left_right(self, pitch_val):
+    def yaw_check(self, pitch_val):
         right = False
         val = 0.0
         change_yaw_val = 0.5
