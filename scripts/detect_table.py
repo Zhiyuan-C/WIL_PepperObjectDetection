@@ -36,7 +36,7 @@ class DetectTable(object):
 
         rate = rospy.Rate(10)
         
-        rospy.loginfo("Start detecting table")
+        
 
         # initialise moveit
         super(DetectTable, self).__init__()
@@ -49,7 +49,7 @@ class DetectTable(object):
         # self.finish_one_side = False
         self.at_left = False
         self.at_right = False
-        self.at_center = False
+        self.at_front = False
         self.detect_object = False
         self.finish_one_side = False
         self.finish_position_check = False
@@ -67,12 +67,14 @@ class DetectTable(object):
         # self.already_spined = False
         # stop_pub_vel = False
         self.start_time = rospy.get_time()
-        while not rospy.is_shutdown():
+        rospy.loginfo("Start detecting table")
+        while not rospy.is_shutdown(): 
+            time.sleep(5)
+            rospy.loginfo(self.detect_object)
             if not self.finish_detect:
                 self.pitch_check()
             elif self.finish_detect:
-                rospy.loginfo("======Object detected, joint is======")
-                if self.at_center:
+                if self.at_front:
                     rospy.loginfo("The object is in front of pepper!")
                 elif self.at_left:
                     if not self.done_turning:
@@ -140,27 +142,31 @@ class DetectTable(object):
         pitch_val = 1.0
         count = 0
         rate = rospy.Rate(10)
-
-        for i in range(3):
-            if rospy.is_shutdown():
-                break
-            if self.finish_detect:
-                break
-            count = i + 1
-            rospy.loginfo("====Start position checking %s ====" % count)
-            pitch_val -= 0.5
-            self.move_head(0.0, pitch_val)
-            time.sleep(2)
-            if self.detect_object:
-                rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
-                self.get_detected_dirction(self.joint_goal)
-                self.finish_detect = True
-                time.sleep(2)
+        
+        if not self.detect_object:
+            for i in range(3):
+                if rospy.is_shutdown():
+                    break
+                if self.finish_detect:
+                    break
+                count = i + 1
+                rospy.loginfo("====Start position checking %s ====" % count)
+                pitch_val -= 0.5
                 self.move_head(0.0, pitch_val)
                 time.sleep(2)
-                break
-            else:
-                self.yaw_check(pitch_val)
+                if self.detect_object:
+                    rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
+                    self.get_detected_dirction(self.joint_goal)
+                    self.finish_detect = True
+                    time.sleep(2)
+                    self.move_head(0.0, pitch_val)
+                    time.sleep(2)
+                    break
+                else:
+                    self.yaw_check(pitch_val)
+        else:
+            self.finish_detect = True
+            self.at_front = True
             
         if not self.detect_object and not self.finish_one_side and not self.finish_detect:
             rospy.loginfo("====No object in this side, back to initial====")
@@ -218,7 +224,7 @@ class DetectTable(object):
         elif joint_val[0] < 0:
             self.at_right = True
         elif joint_val[0] == 0:
-            self.at_center = True
+            self.at_front = True
 
     def execute_joint_goal(self):
         """ Execute joint value to let Pepper move its head """
