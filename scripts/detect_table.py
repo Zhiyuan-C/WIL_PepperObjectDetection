@@ -114,27 +114,6 @@ class DetectTable(object):
         else:
             raise Error("Joint value out of range")
 
-            
-
-    def move_to_left(self):
-        self.joint_goal[0] += 0.5
-        # self.execute_joint_goal(joint_goal)
-        rospy.loginfo("New => %s" % self.joint_goal)
-        if self.joint_goal[0] > 1:
-            self.move_left = False
-            self.move_right = True
-        rospy.loginfo("Sleep for 3 sec")
-        time.sleep(3)
-
-    
-
-    def move_to_right(self):
-        self.joint_goal[0] -= 0.5
-        # self.execute_joint_goal(joint_goal)
-        rospy.loginfo("New => %s" % self.joint_goal)
-        rospy.loginfo("Sleep for 3 sec")
-        time.sleep(3)
-
     def execute_joint_goal(self):
         self.move_group.go(self.joint_goal, wait=True)
         self.move_group.stop()
