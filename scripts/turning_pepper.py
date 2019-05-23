@@ -15,6 +15,12 @@ class TurningPepper(object):
         self.go_right = False
         self.go_left = False
 
+        rate = rospy.Rate(10)
+
+        while not rospy.is_shutdown():
+            
+            rate.sleep()
+
 
     def get_object_center(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
@@ -42,7 +48,10 @@ class TurningPepper(object):
             self.object_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
 
     def get_direction(self, msg):
-        pass
+        if msg.data == "right":
+            self.go_right = True
+        elif msg.data == "left":
+            self.go_left = True
 
 
 if __name__ == "__main__":
