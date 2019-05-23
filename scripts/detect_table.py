@@ -21,6 +21,7 @@ class Error(Exception):
 
 # spin pepper to detect table
 class DetectTable(object):
+    """ Detect table object """
     def __init__(self):
         """ Initialise class, and looping the code untill shutdown the node """
         # initialise node and subscriber
