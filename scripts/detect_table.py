@@ -31,8 +31,8 @@ class DetectTable(object):
         rospy.init_node("detect_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         # initialise publisher
-        pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-        # pub_msg = rospy.Publisher('detect/table/result', String, queue_size=10)
+        # pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        pub_msg = rospy.Publisher('detect_table_result', String, queue_size=10)
         rate = rospy.Rate(10)
         
         # initialise moveit
@@ -57,10 +57,10 @@ class DetectTable(object):
         self.table_center = None
         
         # initialise for turning
-        self.spin_pepper = Twist()
-        self.finish_spin = False
-        self.done_turning = False
-        self.start_time = rospy.get_time()
+        # self.spin_pepper = Twist()
+        # self.finish_spin = False
+        # self.done_turning = False
+        # self.start_time = rospy.get_time()
 
         rospy.loginfo("Start detecting table")
         while not rospy.is_shutdown(): 
@@ -73,42 +73,42 @@ class DetectTable(object):
                     rospy.loginfo("The object is in front of pepper!")
                     # move close to the table object
                 elif self.at_left:
-                    if not self.done_turning:
-                        rospy.loginfo("The object is at left side of pepper, turn left")
-                        if not self.finish_spin:
-                            self.turning_pepper(0.1)
-                            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                            pub_vel.publish(self.spin_pepper)    
-                        else:
-                            end_time = self.start_time + 10
-                            current_time = rospy.get_time()
-                            # publish only for 10s
-                            if current_time < end_time:
-                                self.done_turning = True
-                                rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                                pub_vel.publish(self.spin_pepper)
-                    else:
-                        rospy.loginfo("Turned, object is infront")
+                    # if not self.done_turning:
+                    #     rospy.loginfo("The object is at left side of pepper, turn left")
+                    #     if not self.finish_spin:
+                    #         self.turning_pepper(0.1)
+                    #         rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                    #         pub_vel.publish(self.spin_pepper)    
+                    #     else:
+                    #         end_time = self.start_time + 10
+                    #         current_time = rospy.get_time()
+                    #         # publish only for 10s
+                    #         if current_time < end_time:
+                    #             self.done_turning = True
+                    #             rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                    #             pub_vel.publish(self.spin_pepper)
+                    # else:
+                    #     rospy.loginfo("Turned, object is infront")
 
                 elif self.at_right:
-                    if not self.done_turning:
-                        rospy.loginfo("The object is at left side of pepper, turn left")
-                        if not self.finish_spin:
-                            self.turning_pepper(-0.1)
-                            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                            pub_vel.publish(self.spin_pepper)    
-                        else:
-                            rospy.loginfo("start time is => %s" % self.start_time)
-                            end_time = self.start_time + 10
-                            rospy.loginfo("end time is => %s" % end_time)
-                            current_time = rospy.get_time()
-                            rospy.loginfo("current time is => %s" % current_time)
-                            if current_time < end_time:
-                                self.done_turning = True
-                                rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                                pub_vel.publish(self.spin_pepper)
-                    else:
-                        rospy.loginfo("Turned, object is infront")
+                    # if not self.done_turning:
+                    #     rospy.loginfo("The object is at left side of pepper, turn left")
+                    #     if not self.finish_spin:
+                    #         self.turning_pepper(-0.1)
+                    #         rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                    #         pub_vel.publish(self.spin_pepper)    
+                    #     else:
+                    #         rospy.loginfo("start time is => %s" % self.start_time)
+                    #         end_time = self.start_time + 10
+                    #         rospy.loginfo("end time is => %s" % end_time)
+                    #         current_time = rospy.get_time()
+                    #         rospy.loginfo("current time is => %s" % current_time)
+                    #         if current_time < end_time:
+                    #             self.done_turning = True
+                    #             rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
+                    #             pub_vel.publish(self.spin_pepper)
+                    # else:
+                    #     rospy.loginfo("Turned, object is infront")
 
             elif self.finish_one_side:
                 rospy.loginfo("No object in this direction, turn around")        
