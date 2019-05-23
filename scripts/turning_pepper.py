@@ -6,10 +6,18 @@ from geometry_msgs.msg import Twist
 
 class TurningPepper(object):
 
+    def __init__(self):
+
+        rospy.Subscriber("/objects", Float32MultiArray, self.get_object_center)
+        rospy.Subscriber('detect_table_result', String, self.get_direction)
+
+        self.object_center = None
+        self.go_right = False
+        self.go_left = False
+
 
     def get_object_center(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
-            self.detect_object = True
             # get transformation matrix
             matrix = numpy.zeros((3, 3), dtype='float32')
             matrix[0, 0] = objects.data[3]
@@ -31,7 +39,7 @@ class TurningPepper(object):
             outpt_array = cv2.perspectiveTransform(inpt_array, matrix)
             
             # get object center
-            self.table_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
+            self.object_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
 
     def get_direction(self, msg):
         pass
