@@ -7,4 +7,11 @@
     <remap from="image" to="/naoqi_driver/camera/front/image_raw"/>
     <param name="objects_path" value="$(find wil_pepper_object_detection)/data/$(arg path_name)"/>
   </node>
+
+  <!-- Start detect table -->
+
+  <!-- Start turning pepper -->
+
+  <!-- Start approach to table -->
+  
 </launch>
