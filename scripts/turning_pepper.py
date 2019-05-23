@@ -4,6 +4,10 @@ import rospy
 from std_msgs.msg import String, Float32MultiArray
 from geometry_msgs.msg import Twist
 
+import time
+import numpy
+import cv2
+
 class TurningPepper(object):
 
     def __init__(self):
@@ -11,19 +15,27 @@ class TurningPepper(object):
         rospy.Subscriber("/objects", Float32MultiArray, self.get_object_center)
         rospy.Subscriber('detect_table_result', String, self.get_direction)
 
+        pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
         self.object_center = None
         self.go_right = False
         self.go_left = False
 
         rate = rospy.Rate(10)
+        spin_pepper = Twist()
 
         while not rospy.is_shutdown():
-
-            # if not self.done_turning:
-            #     rospy.loginfo("The object is at left side of pepper, turn left")
-            #     
-            # else:
-            #     rospy.loginfo("Turned, object is infront")
+            if self.go_right:
+                spin_pepper.angular.z = 0.1
+                pub_vel(spin_pepper)
+            elif self.go_left:
+                spin_pepper.angular.z = -0.1
+                pub_vel(spin_pepper)
+            elif 158 < self.object_center[0] < 162:
+                spin_pepper.angular.z = 0.0
+                sleep(5)
+                break
+                
             rate.sleep()
 
 
