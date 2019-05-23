@@ -76,21 +76,15 @@ class TurningPepper(object):
     
     def turning_pepper(self):
         if self.detect_object and 158 < self.object_center[0] < 162:
-            rospy.loginfo("center at => %s" % self.object_center[0])
             self.spin_pepper.angular.z = 0.0
-            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
             self.pub_vel.publish(self.spin_pepper)
-            rospy.loginfo("publishing for 5 sec")
             time.sleep(5)
             self.approach = True
-            rospy.loginfo("stop turning")
         elif self.go_right:
             self.spin_pepper.angular.z = -0.1
-            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
             self.pub_vel.publish(self.spin_pepper)
         elif self.go_left:
             self.spin_pepper.angular.z = 0.1
-            rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
             self.pub_vel.publish(self.spin_pepper)
 
     
