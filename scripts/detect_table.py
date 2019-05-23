@@ -164,9 +164,11 @@ class DetectTable(object):
     def get_detected_dirction(self, joint_val):
         if joint_val[0] > 0:
             rospy.loginfo("Object detected, is at left side of Pepper")
+            rospy.loginfo("======Pepper is about to turn towards left======")
             self.at_left = True
         elif joint_val[0] < 0:
             rospy.loginfo("Object detected, is at right side of Pepper")
+            rospy.loginfo("======Pepper is about to turn towards right======")
             self.at_right = True
         elif joint_val[0] == 0:
             self.at_front = True
