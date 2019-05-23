@@ -4,14 +4,15 @@ import rospy
 from std_msgs.msg import String, Float32MultiArray
 from geometry_msgs.msg import Twist
 
-def get_objects(objects):
-    pass
+class TurningPepper(object):
 
-def get_direction(msg):
-    pass
 
-def main():
-    pass
+    def get_objects(self, objects):
+        pass
+
+    def get_direction(self, msg):
+        pass
+
 
 if __name__ == "__main__":
-    main()
+    start = TurningPepper()
