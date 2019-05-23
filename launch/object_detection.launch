@@ -21,7 +21,7 @@
   <!-- Start find_object_2d -->
   <node name="find_object_2d" pkg="find_object_2d" type="find_object_2d">
     <param name="gui" value="true"/>
-	<param if="$(arg detect_data)" name="objects_path" value="$(find wil_pepper_object_detection)/data/$(arg path_name)"/>
+	<param if="$(arg detect_data)" name="objects_path" value="$(find wil_pepper_object_detection)/data/$(arg path_name)" default="$(find wil_pepper_object_detection)/data/test_data"/>
   </node>
 
   <!-- Start laser -->
