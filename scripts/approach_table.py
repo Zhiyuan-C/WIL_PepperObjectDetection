@@ -18,12 +18,12 @@ class ApproachTable(object):
         self.approach = False
         self.move = Twist()
         self.close_to = False
-
         while not rospy.is_shutdown():
             if self.approach:
-                rospy.loginfo("approach at %s" % self.move)
+                
                 pub.publish(self.move)
                 if self.close_to:
+                    rospy.loginfo("Object is approached")
                     time.sleep(5)
                     break
 
