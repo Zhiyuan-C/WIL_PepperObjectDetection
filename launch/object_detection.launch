@@ -1,11 +1,11 @@
 <launch>
   <!-- Start detect table -->
-  <node name="detect_table" pkg="wil_pepper_object_detection" type="detect_table">
+  <node name="detect_table" pkg="wil_pepper_object_detection" type="detect_table.py" output="screen"></node>
 
   <!-- Start approach to table -->
-  <node name="turning_pepper" pkg="wil_pepper_object_detection" type="turning_pepper">
+  <node name="turning_pepper" pkg="wil_pepper_object_detection" type="turning_pepper.py" output="screen"></node>
 
   <!-- Start turning pepper -->
-  <node name="approach" pkg="wil_pepper_object_detection" type="approach">
+  <node name="approach" pkg="wil_pepper_object_detection" type="approach_table.py" output="screen"></node>
   
 </launch>
