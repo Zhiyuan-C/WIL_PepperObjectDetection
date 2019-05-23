@@ -1,6 +1,5 @@
 <launch>
-  <arg name="detect_data" default="false"/>
-  <arg name="path_name" default="data"/>
+  <arg name="path_name" default="test_data"/>
 
   <!-- launch Pepper dcm bringup -->
   <include file="$(find pepper_dcm_bringup)/launch/pepper_bringup.launch" >
@@ -17,8 +16,13 @@
 
   <!-- Start MoveIt -->
   <include file="$(find wil_pepper_object_detection)/launch/moveit_planner.launch" ></include>
-
-
+    
+  <!-- Start find_object_2d -->
+  <node name="find_object_2d" pkg="find_object_2d" type="find_object_2d">
+    <param name="gui" value="true"/>
+    <remap from="image" to="/naoqi_driver/camera/front/image_raw"/>
+    <param name="objects_path" value="$(find wil_pepper_object_detection)/data/$(arg path_name)"/>
+  </node>
 
   <!-- Start laser -->
   <include file="$(find pepper_sensors_py)/launch/laser.launch" ></include>
