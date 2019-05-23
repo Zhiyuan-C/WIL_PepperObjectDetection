@@ -64,8 +64,8 @@ class DetectTable(object):
 
         rospy.loginfo("Start detecting table")
         while not rospy.is_shutdown(): 
-            time.sleep(5)
-            rospy.loginfo(self.detect_object)
+            
+            # rospy.loginfo(self.detect_object)
             if not self.finish_detect:
                 self.pitch_check()
             elif self.finish_detect:
@@ -74,8 +74,6 @@ class DetectTable(object):
                     # move close to the table object
                 elif self.at_left:
                     pub_msg.publish("left")
-                        
-
                     # if not self.done_turning:
                     #     rospy.loginfo("The object is at left side of pepper, turn left")
                     #     if not self.finish_spin:
@@ -132,7 +130,7 @@ class DetectTable(object):
         pitch_val = 1.0
         count = 0
         rate = rospy.Rate(10)
-        
+        time.sleep(5)
         if not self.detect_object:
             for i in range(3):
                 if rospy.is_shutdown():
