@@ -57,18 +57,14 @@ class DetectTable(object):
 
         self.far = False
 
-        rospy.loginfo("Start detecting table")
+        rospy.loginfo("******Start to detecting table object******")
         while not rospy.is_shutdown(): 
-            
-            # rospy.loginfo(self.detect_object)
             if not self.finish_detect:
                 self.pitch_check()
             elif self.finish_detect:
                 if self.at_front:
-                    rospy.loginfo("The object is in front of pepper!")
                     if self.far:
                         pub_approach_msg.publish("ready")
-                    # move close to the table object
                 elif self.at_left:
                     pub_msg.publish("left")
 
@@ -76,7 +72,7 @@ class DetectTable(object):
                     pub_msg.publish("right")
 
             elif self.finish_one_side:
-                rospy.loginfo("No object in this direction, turn around")        
+                rospy.loginfo("====No object detected====")        
 
             rate.sleep()
 
@@ -94,17 +90,17 @@ class DetectTable(object):
                 if self.finish_detect:
                     break
                 count = i + 1
-                rospy.loginfo("====Start position checking %s ====" % count)
+                rospy.loginfo("====Start detecting object at position %s ====" % count)
                 pitch_val -= 0.5
                 self.move_head(0.0, pitch_val)
-                time.sleep(2)
+                rospy.loginfo("Searching for object")
+                time.sleep(5)
                 if self.detect_object:
-                    rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
                     self.get_detected_dirction(self.joint_goal)
                     self.finish_detect = True
                     time.sleep(2)
                     self.move_head(0.0, pitch_val)
-                    time.sleep(2)
+                    time.sleep(5)
                     break
                 else:
                     self.yaw_check(pitch_val)
@@ -113,7 +109,7 @@ class DetectTable(object):
             self.at_front = True
             
         if not self.detect_object and not self.finish_one_side and not self.finish_detect:
-            rospy.loginfo("====No object in this side, back to initial====")
+            
             self.finish_one_side = True
             self.move_head(0.0, 0.0)
             time.sleep(2)
@@ -127,7 +123,6 @@ class DetectTable(object):
             if rospy.is_shutdown():
                 break
             if self.detect_object:
-                rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
                 self.get_detected_dirction(self.joint_goal)
                 self.finish_detect = True
                 #/////////////
@@ -137,15 +132,17 @@ class DetectTable(object):
                 if self.joint_goal[1] == 0.5 and (self.joint_goal[0] == 1.0 or self.joint_goal[0] == -1.0):
                     pitch_val = 0.1
                 self.move_head(0.0, pitch_val)
-                time.sleep(2)
+                time.sleep(5)
                 break
             else:
                 if right:
                     change_yaw_val = -0.5
                 cr = i + 1
-                rospy.loginfo("====Start side checking %s ====" % cr)
+                rospy.loginfo("====Start detecting side view at position %s ====" % cr)
                 val += change_yaw_val
                 self.move_head(val, pitch_val)
+                rospy.loginfo("Searching for object")
+                time.sleep(5)
                 if val == 1.0:
                     val = 0.0
                     right = True
@@ -161,20 +158,19 @@ class DetectTable(object):
             self.joint_goal[1] = pitch_val # move down
             self.execute_joint_goal()
             # when at 0.5, the max left and right are 1 , -1
-            # rospy.loginfo(move_group.get_current_state())
-            rospy.loginfo("moved to => %s" % self.joint_goal)
-            rospy.loginfo("Sleep for 3 sec")
-            time.sleep(3)
         else:
             raise Error("Joint value out of range")
 
     def get_detected_dirction(self, joint_val):
         if joint_val[0] > 0:
+            rospy.loginfo("Object detected, is at left side of Pepper")
             self.at_left = True
         elif joint_val[0] < 0:
+            rospy.loginfo("Object detected, is at right side of Pepper")
             self.at_right = True
         elif joint_val[0] == 0:
             self.at_front = True
+            rospy.loginfo("Object detected, is in front of Pepper")
 
     def execute_joint_goal(self):
         """ Execute joint value to let Pepper move its head """
