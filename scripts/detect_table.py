@@ -64,9 +64,9 @@ class DetectTable(object):
                 elif self.at_right:
                     pub_msg.publish("right")
 
-            elif self.finish_one_side:
-                rospy.loginfo("====No object detected====")
-                break        
+                elif self.finish_one_side:
+                    rospy.loginfo("====No object detected====")
+                    break        
 
             rate.sleep()
 
@@ -98,14 +98,16 @@ class DetectTable(object):
                     break
                 else:
                     self.yaw_check(pitch_val)
-        else:
+                if count == 3 and not self.detect_object:
+                    self.finish_one_side = True
+                    self.finish_detect = True
+                    self.move_head(0.0, 0.0)
+                    time.sleep(3)
+        elif self.detect_object:
             self.finish_detect = True
             self.at_front = True
             
-        if not self.detect_object and not self.finish_one_side and not self.finish_detect:
-            self.finish_one_side = True
-            self.move_head(0.0, 0.0)
-            time.sleep(3)
+        
 
     def yaw_check(self, pitch_val):
         """Move Pepper's head left and right to detect object"""
@@ -143,16 +145,16 @@ class DetectTable(object):
                     val = 0.0
                     right = True
         if self.detect_object:
-                self.get_detected_dirction(self.joint_goal)
-                self.finish_detect = True
-                #/////////////
-                # move pitch_val up a bit when its looking down, 
-                # because if detect at very side, the head slitly went up, 
-                # if stay at the original position, when turning will not detect object
-                if self.joint_goal[1] == 0.5 and (self.joint_goal[0] == 1.0 or self.joint_goal[0] == -1.0):
-                    pitch_val = 0.1
-                self.move_head(0.0, pitch_val)
-                time.sleep(5)
+            self.get_detected_dirction(self.joint_goal)
+            self.finish_detect = True
+            #/////////////
+            # move pitch_val up a bit when its looking down, 
+            # because if detect at very side, the head slitly went up, 
+            # if stay at the original position, when turning will not detect object
+            if self.joint_goal[1] == 0.5 and (self.joint_goal[0] == 1.0 or self.joint_goal[0] == -1.0):
+                pitch_val = 0.1
+            self.move_head(0.0, pitch_val)
+            time.sleep(5)
     
     def move_head(self, yaw_val, pitch_val):
         """ Set joints value for move the head of Pepper
