@@ -1,6 +1,6 @@
 <launch>
   <arg name="detect_data" default="false"/>
-  <arg name="path_name" default="data"/>
+  <arg name="path_name" default="test_data"/>
 
   <!-- Start find_object_2d -->
   <node name="find_object_2d" pkg="find_object_2d" type="find_object_2d">
