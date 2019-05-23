@@ -11,7 +11,7 @@ import cv2
 class TurningPepper(object):
 
     def __init__(self):
-
+        rospy.init_node("turning_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.get_object_center)
         rospy.Subscriber('detect_table_result', String, self.get_direction)
 
@@ -20,27 +20,36 @@ class TurningPepper(object):
         self.object_center = None
         self.go_right = False
         self.go_left = False
+        self.detect_object = False
 
         rate = rospy.Rate(10)
         spin_pepper = Twist()
 
         while not rospy.is_shutdown():
-            if self.go_right:
-                spin_pepper.angular.z = 0.1
-                pub_vel(spin_pepper)
-            elif self.go_left:
-                spin_pepper.angular.z = -0.1
-                pub_vel(spin_pepper)
-            elif 158 < self.object_center[0] < 162:
+            if self.detect_object and 158 < self.object_center[0] < 162:
+                rospy.loginfo("center at => %s" % self.object_center[0])
                 spin_pepper.angular.z = 0.0
-                sleep(5)
+                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                pub_vel.publish(spin_pepper)
+                rospy.loginfo("publishing for 5 sec")
+                time.sleep(5)
+                rospy.loginfo("exit")
                 break
+            elif self.go_right:
+                spin_pepper.angular.z = -0.1
+                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                pub_vel.publish(spin_pepper)
+            elif self.go_left:
+                spin_pepper.angular.z = 0.1
+                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                pub_vel.publish(spin_pepper)
 
             rate.sleep()
 
 
     def get_object_center(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
+            self.detect_object = True
             # get transformation matrix
             matrix = numpy.zeros((3, 3), dtype='float32')
             matrix[0, 0] = objects.data[3]
