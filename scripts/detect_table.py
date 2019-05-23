@@ -4,6 +4,8 @@ import time
 
 import rospy
 from std_msgs.msg import String, Float32MultiArray
+from sensor_msgs.msg import LaserScan
+
 
 import moveit_commander
 import moveit_msgs.msg
@@ -27,8 +29,10 @@ class DetectTable(object):
         # initialise
         rospy.init_node("detect_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        rospy.Subscriber('/laser/srd_front/scan', LaserScan, self.get_laser_msg)
         # initialise publisher
         pub_msg = rospy.Publisher('detect_table_result', String, queue_size=10)
+        pub_approach_msg = rospy.Publisher('approach_table', String, queue_size=10)
         rate = rospy.Rate(10)
         
         # initialise moveit
@@ -51,6 +55,8 @@ class DetectTable(object):
         self.up_down_check_count = 3
         self.cb_count = 0
 
+        self.far = False
+
         rospy.loginfo("Start detecting table")
         while not rospy.is_shutdown(): 
             
@@ -60,6 +66,8 @@ class DetectTable(object):
             elif self.finish_detect:
                 if self.at_front:
                     rospy.loginfo("The object is in front of pepper!")
+                    if self.far:
+                        pub_approach_msg.publish("ready")
                     # move close to the table object
                 elif self.at_left:
                     pub_msg.publish("left")
@@ -184,6 +192,11 @@ class DetectTable(object):
             self.detect_object = True
         else:
             self.detect_object = False
+    
+    def get_laser_msg(self, msg):
+        if msg.ranges[7] > 0.5:
+            self.far = True
+
 
 
 if __name__ == '__main__':
