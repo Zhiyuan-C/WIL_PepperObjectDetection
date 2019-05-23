@@ -35,7 +35,7 @@ class TurningPepper(object):
                 spin_pepper.angular.z = 0.0
                 sleep(5)
                 break
-                
+
             rate.sleep()
 
 
@@ -70,22 +70,6 @@ class TurningPepper(object):
         elif msg.data == "left":
             self.go_left = True
     
-    def turning(self, val):
-        if self.finish_detect:
-            if self.detect_object:
-                # camera center for x axis, is 160
-                # continue spin untill to the center
-                if 158 < self.table_center[0] < 162:
-                    rospy.loginfo("start turning at %s " % val)
-                    self.spin_pepper.angular.z = 0.0
-                    self.finish_spin = True
-                    self.start_time = rospy.get_time()
-            else:
-                rospy.loginfo("start turning at %s " % val)
-                self.spin_pepper.angular.z = val
-        else:
-            # trun pepper at speed of 0.2
-            rospy.loginfo("no object detect, turning at 0.2 velocity")
 
 
 
