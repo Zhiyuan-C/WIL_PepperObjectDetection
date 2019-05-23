@@ -6,16 +6,9 @@ import rospy
 from std_msgs.msg import String, Float32MultiArray
 from sensor_msgs.msg import LaserScan
 
-
 import moveit_commander
 import moveit_msgs.msg
 from moveit_commander.conversions import pose_to_list
-
-# roslaunch pepper_dcm_bringup pepper_bringup.launch network_interface:=enp2s0 roscore_ip:=kate-iMac.local
-# roslaunch naoqi_driver naoqi_driver.launch nao_ip:=192.168.0.139 network_interface:=enp2s0 roscore_ip:=kate-iMac.local
-# roslaunch wil_pepper_object_detection moveit_planner.launch
-# rosrun find_object_2d find_object_2d image:=/naoqi_driver/camera/front/image_raw
-# rosrun moveit_commander moveit_commander_cmdline.py
 
 class Error(Exception):
     def __init__(self, error_message):
