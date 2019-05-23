@@ -22,33 +22,35 @@ class TurningPepper(object):
         self.go_right = False
         self.go_left = False
         self.detect_object = False
+        self.ready_to_spin = False
 
         rate = rospy.Rate(10)
         spin_pepper = Twist()
         approach = False
 
         while not rospy.is_shutdown():
-            if not approach:
-                if self.detect_object and 158 < self.object_center[0] < 162:
-                    rospy.loginfo("center at => %s" % self.object_center[0])
-                    spin_pepper.angular.z = 0.0
-                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                    pub_vel.publish(spin_pepper)
-                    rospy.loginfo("publishing for 5 sec")
-                    time.sleep(5)
-                    approach = True
-                    rospy.loginfo("exit")
-                    continue
-                elif self.go_right:
-                    spin_pepper.angular.z = -0.1
-                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                    pub_vel.publish(spin_pepper)
-                elif self.go_left:
-                    spin_pepper.angular.z = 0.1
-                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                    pub_vel.publish(spin_pepper)
-            elif approach:
-                pub_msg.publish("ready")
+            if self.ready_to_spin:
+                if not approach:
+                    if self.detect_object and 158 < self.object_center[0] < 162:
+                        rospy.loginfo("center at => %s" % self.object_center[0])
+                        spin_pepper.angular.z = 0.0
+                        rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                        pub_vel.publish(spin_pepper)
+                        rospy.loginfo("publishing for 5 sec")
+                        time.sleep(5)
+                        approach = True
+                        rospy.loginfo("exit")
+                        continue
+                    elif self.go_right:
+                        spin_pepper.angular.z = -0.1
+                        rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                        pub_vel.publish(spin_pepper)
+                    elif self.go_left:
+                        spin_pepper.angular.z = 0.1
+                        rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                        pub_vel.publish(spin_pepper)
+                elif approach:
+                    pub_msg.publish("ready")
 
 
             rate.sleep()
@@ -81,6 +83,8 @@ class TurningPepper(object):
             self.object_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
 
     def get_direction(self, msg):
+        if len(msg.data) > 0:
+            self.ready_to_spin = True
         if msg.data == "right":
             self.go_right = True
         elif msg.data == "left":
