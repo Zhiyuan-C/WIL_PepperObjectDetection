@@ -18,7 +18,10 @@ class DetectObject(object):
     def __init__(self):
         """Initialisation"""
         rospy.init_node("detect_object", anonymous=True)
-        rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
+        rospy.Subscriber("/objects", Float32MultiArray, self.get_object_center)
+
+        rate = rospy.Rate(10)
+
     
     def get_object_center(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
