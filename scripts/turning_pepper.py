@@ -11,11 +11,12 @@ import cv2
 class TurningPepper(object):
 
     def __init__(self):
-        rospy.init_node("turning_table", anonymous=True)
+        rospy.init_node("turning_pepper", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.get_object_center)
         rospy.Subscriber('detect_table_result', String, self.get_direction)
 
         pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        pub_msg = rospy.Publisher('approach_table', String, queue_size=10)
 
         self.object_center = None
         self.go_right = False
@@ -33,6 +34,7 @@ class TurningPepper(object):
                 pub_vel.publish(spin_pepper)
                 rospy.loginfo("publishing for 5 sec")
                 time.sleep(5)
+                pub_msg.publish("true")
                 rospy.loginfo("exit")
                 break
             elif self.go_right:
