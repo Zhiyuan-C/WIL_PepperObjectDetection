@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
 import time
-import numpy
-import cv2
 
 import rospy
 from std_msgs.msg import String, Float32MultiArray
-from geometry_msgs.msg import Twist
 
 import moveit_commander
 import moveit_msgs.msg
@@ -31,7 +28,6 @@ class DetectTable(object):
         rospy.init_node("detect_table", anonymous=True)
         rospy.Subscriber("/objects", Float32MultiArray, self.detect_table)
         # initialise publisher
-        # pub_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         pub_msg = rospy.Publisher('detect_table_result', String, queue_size=10)
         rate = rospy.Rate(10)
         
@@ -54,13 +50,6 @@ class DetectTable(object):
         self.left_right_check_count = 4
         self.up_down_check_count = 3
         self.cb_count = 0
-        # self.table_center = None
-        
-        # initialise for turning
-        # self.spin_pepper = Twist()
-        # self.finish_spin = False
-        # self.done_turning = False
-        # self.start_time = rospy.get_time()
 
         rospy.loginfo("Start detecting table")
         while not rospy.is_shutdown(): 
@@ -74,44 +63,9 @@ class DetectTable(object):
                     # move close to the table object
                 elif self.at_left:
                     pub_msg.publish("left")
-                    # if not self.done_turning:
-                    #     rospy.loginfo("The object is at left side of pepper, turn left")
-                    #     if not self.finish_spin:
-                    #         self.turning_pepper(0.1)
-                    #         rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                    #         pub_vel.publish(self.spin_pepper)    
-                    #     else:
-                    #         end_time = self.start_time + 10
-                    #         current_time = rospy.get_time()
-                    #         # publish only for 10s
-                    #         if current_time < end_time:
-                    #             self.done_turning = True
-                    #             rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                    #             pub_vel.publish(self.spin_pepper)
-                    # else:
-                    #     rospy.loginfo("Turned, object is infront")
 
                 elif self.at_right:
                     pub_msg.publish("right")
-                        
-                    # if not self.done_turning:
-                    #     rospy.loginfo("The object is at left side of pepper, turn left")
-                    #     if not self.finish_spin:
-                    #         self.turning_pepper(-0.1)
-                    #         rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                    #         pub_vel.publish(self.spin_pepper)    
-                    #     else:
-                    #         rospy.loginfo("start time is => %s" % self.start_time)
-                    #         end_time = self.start_time + 10
-                    #         rospy.loginfo("end time is => %s" % end_time)
-                    #         current_time = rospy.get_time()
-                    #         rospy.loginfo("current time is => %s" % current_time)
-                    #         if current_time < end_time:
-                    #             self.done_turning = True
-                    #             rospy.loginfo("publish at velocity => %s" % self.spin_pepper.angular.z)
-                    #             pub_vel.publish(self.spin_pepper)
-                    # else:
-                    #     rospy.loginfo("Turned, object is infront")
 
             elif self.finish_one_side:
                 rospy.loginfo("No object in this direction, turn around")        
@@ -174,6 +128,12 @@ class DetectTable(object):
                 rospy.loginfo("object detected at joint val => %s" % self.joint_goal)
                 self.get_detected_dirction(self.joint_goal)
                 self.finish_detect = True
+                #/////////////
+                # move pitch_val up a bit when its looking down, 
+                # because if detect at very side, the head slitly went up, 
+                # if stay at the original position, when turning will not detect object
+                if self.joint_goal[1] == 0.5 and (self.joint_goal[0] == 1.0 or self.joint_goal[0] == -1.0):
+                    pitch_val = 0.1
                 self.move_head(0.0, pitch_val)
                 time.sleep(2)
                 break
@@ -218,61 +178,13 @@ class DetectTable(object):
         """ Execute joint value to let Pepper move its head """
         self.move_group.go(self.joint_goal, wait=True)
         self.move_group.stop()
-    
-    def turning_pepper(self, val):
-        if self.finish_detect:
-            if self.detect_object:
-                # camera center for x axis, is 160
-                # continue spin untill to the center
-                if 158 < self.table_center[0] < 162:
-                    rospy.loginfo("start turning at %s " % val)
-                    self.spin_pepper.angular.z = 0.0
-                    self.finish_spin = True
-                    self.start_time = rospy.get_time()
-            else:
-                rospy.loginfo("start turning at %s " % val)
-                self.spin_pepper.angular.z = val
-        else:
-            # trun pepper at speed of 0.2
-            rospy.loginfo("no object detect, turning at 0.2 velocity")
 
     def detect_table(self, objects):
         if len(objects.data) > 0 and objects.data[0] == 1:
             self.detect_object = True
-            # # get transformation matrix
-            # matrix = numpy.zeros((3, 3), dtype='float32')
-            # matrix[0, 0] = objects.data[3]
-            # matrix[1, 0] = objects.data[4]
-            # matrix[2, 0] = objects.data[5]
-            # matrix[0, 1] = objects.data[6]
-            # matrix[1, 1] = objects.data[7]
-            # matrix[2, 1] = objects.data[8]
-            # matrix[0, 2] = objects.data[9]
-            # matrix[1, 2] = objects.data[10]
-            # matrix[2, 2] = objects.data[11]
-            
-            # # get array of 2d vectors to transform
-            # width = objects.data[1]
-            # height = objects.data[2]
-            # inpt_array = numpy.float32([[0,0],[width-1,0],[0,height-1],[width-1,height-1]]).reshape(-1,1,2)
-            
-            # # perfrom perspective transformation
-            # outpt_array = cv2.perspectiveTransform(inpt_array, matrix)
-            
-            # # get object center
-            # self.table_center = (outpt_array[0, 0] + outpt_array[1, 0] + outpt_array[2, 0] + outpt_array[3, 0]) / 4
-            
-            
-
         else:
             self.detect_object = False
-        
-        
-        
-        # more
-        # check if the object width and height is in relation to the real frame
-        # if is in relation to the real frame
-        # spin the pepper, until the object is in the ejge of the camera
+
 
 if __name__ == '__main__':
     detect = DetectTable()
