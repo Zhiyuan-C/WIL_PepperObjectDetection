@@ -1,0 +1,5 @@
+How to use the package
+roslaunch wil_pepper_object_detection pre_launch.launch
+
+After launched
+roslaunch wil_pepper_object_detection object_detection.launch
