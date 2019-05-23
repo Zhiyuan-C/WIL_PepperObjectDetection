@@ -25,26 +25,31 @@ class TurningPepper(object):
 
         rate = rospy.Rate(10)
         spin_pepper = Twist()
+        approach = False
 
         while not rospy.is_shutdown():
-            if self.detect_object and 158 < self.object_center[0] < 162:
-                rospy.loginfo("center at => %s" % self.object_center[0])
-                spin_pepper.angular.z = 0.0
-                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                pub_vel.publish(spin_pepper)
-                rospy.loginfo("publishing for 5 sec")
-                time.sleep(5)
-                pub_msg.publish("true")
-                rospy.loginfo("exit")
-                break
-            elif self.go_right:
-                spin_pepper.angular.z = -0.1
-                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                pub_vel.publish(spin_pepper)
-            elif self.go_left:
-                spin_pepper.angular.z = 0.1
-                rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
-                pub_vel.publish(spin_pepper)
+            if not approach:
+                if self.detect_object and 158 < self.object_center[0] < 162:
+                    rospy.loginfo("center at => %s" % self.object_center[0])
+                    spin_pepper.angular.z = 0.0
+                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                    pub_vel.publish(spin_pepper)
+                    rospy.loginfo("publishing for 5 sec")
+                    time.sleep(5)
+                    approach = True
+                    rospy.loginfo("exit")
+                    continue
+                elif self.go_right:
+                    spin_pepper.angular.z = -0.1
+                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                    pub_vel.publish(spin_pepper)
+                elif self.go_left:
+                    spin_pepper.angular.z = 0.1
+                    rospy.loginfo("publish at velocity => %s" % spin_pepper.angular.z)
+                    pub_vel.publish(spin_pepper)
+            elif approach:
+                pub_msg.publish("ready")
+
 
             rate.sleep()
 
