@@ -78,12 +78,6 @@ class DetectTable(object):
             elif self.finish_one_side:
                 rospy.loginfo("No object in this direction, turn around")        
 
-                # rospy.loginfo("======Object detected, object center is======")
-                # rospy.loginfo(self.table_center)
-                # rospy.loginfo(type(self.table_center))
-            # 2, string, publish when table data detected
-            #     pub_msg(self.pub_data)
-
             rate.sleep()
 
 
